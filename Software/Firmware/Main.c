@@ -3,6 +3,7 @@
  * @author Adrien RICCIARDI
  */
 #include <system.h>
+#include "ADC.h"
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -35,10 +36,11 @@ void main(void)
 	
 	// Initialize the peripherals
 	UARTInitialize();
+	ADCInitialize();
 	
 	// Enable the interrupts
 	rcon.IPEN = 1; // Enable interrupt priority
-	intcon = 0xC0; // Enable all high priority and all low priority interrupts
+	intcon |= 0xC0; // Enable all high priority and all low priority interrupts
 	
 	// TEST
 	trisb.5 = 0;
@@ -46,8 +48,6 @@ void main(void)
 	
 	latb.5 = 0;
 	latb.4 = 1;
-	
-	while (1);
 
 	while (1)
 	{

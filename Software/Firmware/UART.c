@@ -3,6 +3,7 @@
  * @author Adrien RICCIARDI
  */
 #include <system.h>
+#include "ADC.h"
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -61,14 +62,15 @@ void UARTInitialize(void)
 	txsta2 = 0x24; // Use 8-bit transmission, enable transmission, use asynchronous mode, select high baud rate
 	
 	// Enable the UART interrupts
-	pie3 |= 0x30; // Enable reception and transmission interrupts
 	ipr3 &= ~0x30; // Set both interrupts as low priority
+	pie3 |= 0x30; // Enable reception and transmission interrupts
 }
 
 void UARTInterruptHandler(void)
 {
 	static unsigned char Is_Magic_Number_Received = 0, Command_Answer[UART_PROTOCOL_COMMAND_ANSWER_SIZE];
 	unsigned char Byte;
+	unsigned short Word;
 	
 	// A byte has been received
 	if (pie3.RC2IE && pir3.RC2IF)
@@ -85,12 +87,9 @@ void UARTInterruptHandler(void)
 			switch (Byte)
 			{
 				case UART_COMMAND_GET_BATTERY_VOLTAGE:
-					// TODO
-					// ADC_DISABLE_INTERRUPT
-						// TEST
-						Command_Answer[0] = 0xAB;
-						Command_Answer[1] = 0xCD;
-						//latb.5=0;latb.4=1;
+					Word = ADCGetLastSampledBatteryVoltage();
+					Command_Answer[0] = Word >> 8;
+					Command_Answer[1] = (unsigned char) Word;
 					UARTStartAnswerTransmission(Command_Answer[0]);
 					break;
 					
