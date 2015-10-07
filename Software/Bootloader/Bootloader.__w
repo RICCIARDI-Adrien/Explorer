@@ -2,5 +2,6 @@
 Count=1
 Active=0
 Proj0=Bootloader.__c
+Proj1=..\Firmware\Firmware.__c
 [Settings]
 Config=0

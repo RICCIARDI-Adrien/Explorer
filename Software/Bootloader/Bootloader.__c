@@ -11,10 +11,13 @@ Type=0
 Warnings=1
 Model=0
 [Files]
-Count=3
-File0=Main.c
-File1=UART.c
-File2=UART.h
+Count=6
+File0=Flash.c
+File1=Flash.h
+File2=Led.h
+File3=Main.c
+File4=UART.c
+File5=UART.h
 [Tools]
 BoostDir=C:\Program Files\SourceBoost\
 Programmer=

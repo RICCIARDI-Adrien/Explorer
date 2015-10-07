@@ -7,14 +7,17 @@ ClockRate=64000000
 Last Ext=c
 Last ExtIdx=1
 Last Dir=C:\Program Files\SourceBoost\include\
+Type=0
+Warnings=1
+Model=0
 [Files]
 Count=6
-File0=ADC.h
-File1=Interrupt.c
-File2=Main.c
-File3=UART.c
-File4=UART.h
-File5=ADC.c
+File0=ADC.c
+File1=ADC.h
+File2=Interrupt.c
+File3=Main.c
+File4=UART.c
+File5=UART.h
 [Bookmarks]
 Count=0
 [Breakpoints]
@@ -33,3 +36,7 @@ Led Block (#2)=706F727462000000000000000000
 Speed Tester=6B094201040000004E6F6E65
 [Debugger]
 DebugFromMain=1
+[Tools]
+BoostDir=C:\Program Files\SourceBoost\
+Programmer=
+PrefixWithBuildThreadNum=0

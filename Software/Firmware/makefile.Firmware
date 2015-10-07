@@ -5,30 +5,30 @@ Release:
 
 CC = "C:\Program Files\SourceBoost\boostc_pic18.exe"
 
-Release\Interrupt.obj: Interrupt.c ADC.h UART.h
+Release\ADC.obj: ADC.c ADC.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 1 -obj Release -d _RELEASE
 
-Release\Main.obj: Main.c ADC.h UART.h
+Release\Interrupt.obj: Interrupt.c ADC.h UART.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 1 -obj Release -d _RELEASE
 
-Release\UART.obj: UART.c ADC.h UART.h
+Release\Main.obj: Main.c ADC.h UART.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 1 -obj Release -d _RELEASE
 
-Release\ADC.obj: ADC.c ADC.h
+Release\UART.obj: UART.c ADC.h UART.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 1 -obj Release -d _RELEASE
 
 LD = "C:\Program Files\SourceBoost\boostlink_picmicro.exe"
 
-Release\Firmware.hex: Release\Interrupt.obj Release\Main.obj Release\UART.obj Release\ADC.obj 
-	$(LD)  -idx 1  /ld "C:\Program Files\SourceBoost\lib" libc.pic18.lib $+ /t PIC18F26K22 /d "Release" /p Firmware
+Release\Firmware.hex: Release\ADC.obj Release\Interrupt.obj Release\Main.obj Release\UART.obj 
+	$(LD)  -idx 1  /ld "C:\Program Files\SourceBoost\lib" libc.pic18.lib $+ /t PIC18F26K22 -rb 0x400  /d "Release" /p Firmware
 
 all: Release Release\Firmware.hex
 
 clean:
+	@if exist Release\ADC.obj del Release\ADC.obj
 	@if exist Release\Interrupt.obj del Release\Interrupt.obj
 	@if exist Release\Main.obj del Release\Main.obj
 	@if exist Release\UART.obj del Release\UART.obj
-	@if exist Release\ADC.obj del Release\ADC.obj
 	@if exist Release\Firmware.hex del Release\Firmware.hex
 	@if exist Release\Firmware.asm del Release\Firmware.asm
 	@if exist Release\Firmware.lst del Release\Firmware.lst

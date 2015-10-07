@@ -5,20 +5,24 @@ Release:
 
 CC = "C:\Program Files\SourceBoost\boostc_pic18.exe"
 
-Release\Main.obj: Main.c UART.h
+Release\Flash.obj: Flash.c Flash.h Bootloader.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 1 -obj Release -d _RELEASE
 
-Release\UART.obj: UART.c UART.h
+Release\Main.obj: Main.c Flash.h Led.h UART.h Bootloader.Release.__f
+	$(CC) $< -t PIC18F26K22  -idx 1 -obj Release -d _RELEASE
+
+Release\UART.obj: UART.c UART.h Bootloader.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 1 -obj Release -d _RELEASE
 
 LD = "C:\Program Files\SourceBoost\boostlink_picmicro.exe"
 
-Release\Bootloader.hex: Release\Main.obj Release\UART.obj 
+Release\Bootloader.hex: Release\Flash.obj Release\Main.obj Release\UART.obj 
 	$(LD)  -idx 1  /ld "C:\Program Files\SourceBoost\lib" libc.pic18.lib $+ /t PIC18F26K22 /d "Release" /p Bootloader
 
 all: Release Release\Bootloader.hex
 
 clean:
+	@if exist Release\Flash.obj del Release\Flash.obj
 	@if exist Release\Main.obj del Release\Main.obj
 	@if exist Release\UART.obj del Release\UART.obj
 	@if exist Release\Bootloader.hex del Release\Bootloader.hex
