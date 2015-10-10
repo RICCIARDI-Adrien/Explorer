@@ -20,7 +20,7 @@ Release\UART.obj: UART.c ADC.h UART.h Firmware.Release.__f
 LD = "C:\Program Files\SourceBoost\boostlink_picmicro.exe"
 
 Release\Firmware.hex: Release\ADC.obj Release\Interrupt.obj Release\Main.obj Release\UART.obj 
-	$(LD)  -idx 1  /ld "C:\Program Files\SourceBoost\lib" libc.pic18.lib $+ /t PIC18F26K22 -rb 0x400  /d "Release" /p Firmware
+	$(LD)  -idx 1  /ld "C:\Program Files\SourceBoost\lib" libc.pic18.lib $+ /t PIC18F26K22 -rb 0x300  /d "Release" /p Firmware
 
 all: Release Release\Firmware.hex
 

@@ -29,7 +29,7 @@
 // Constants and macros
 //--------------------------------------------------------------------------------------------------
 /** The firmware base address. */
-#define MAIN_FIRMWARE_BASE_ADDRESS 0x400
+#define MAIN_FIRMWARE_BASE_ADDRESS 0x300
 /** The update flag location. */
 #define MAIN_UPDATE_FLAG_ADDRESS 0xFFC0 //The PIC18F26K22 flash last block
 
@@ -37,6 +37,8 @@
 #define MAIN_PROTOCOL_MAGIC_NUMBER 0xA5
 /** The "start update" command. */
 #define MAIN_PROTOCOL_COMMAND_START_FIRMWARE_UPDATE 2
+/** The "get running mode" command. */
+#define MAIN_PROTOCOL_COMMAND_GET_RUNNING_MODE 3
 /** The bootloader acknowledges that it has received and flashed a block. */
 #define MAIN_PROTOCOL_ACKNOWLEDGE 0x42
 
@@ -88,8 +90,14 @@ void main(void)
 			// Wait for the magic number
 			if (!Is_Magic_Number_Received && (Byte == MAIN_PROTOCOL_MAGIC_NUMBER)) Is_Magic_Number_Received = 1;
 			// Wait for the command if the magic number was received
-			else if (Is_Magic_Number_Received && (Byte == MAIN_PROTOCOL_COMMAND_START_FIRMWARE_UPDATE)) break;
-			else Is_Magic_Number_Received = 0;
+			else if (Is_Magic_Number_Received)
+			{
+				if (Byte == MAIN_PROTOCOL_COMMAND_START_FIRMWARE_UPDATE) break;
+				// Tell the PC that the microcontroller is in bootloader mode
+				else if (Byte == MAIN_PROTOCOL_COMMAND_GET_RUNNING_MODE) UARTWriteByte(0);
+
+				Is_Magic_Number_Received = 0;
+			}
 		}
 		
 		// Receive the firmware size

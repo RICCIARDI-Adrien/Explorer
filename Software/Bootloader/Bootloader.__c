@@ -1,7 +1,7 @@
 [Settings]
 Target=PIC18F26K22
 Active Compiler=BoostC
-Active Directory=C:\Documents and Settings\Administrateur\Mes documents\Explorer\Software\Firmware\
+Active Directory=C:\Documents and Settings\Administrateur\Mes documents\Explorer\Software\Bootloader\
 Active Config=Release
 Last Ext=h
 Last ExtIdx=1
@@ -10,6 +10,8 @@ ClockRate=64000000
 Type=0
 Warnings=1
 Model=0
+Profiling=0
+Snapshot=0
 [Files]
 Count=6
 File0=Flash.c
@@ -44,3 +46,7 @@ Speed Tester=6B094201040000004E6F6E65
 compile=1
 link=1
 program=0
+[Watch]
+Count=0
+[Watchpoint]
+Count=0

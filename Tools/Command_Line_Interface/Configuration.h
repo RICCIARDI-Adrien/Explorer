@@ -13,7 +13,7 @@
 /** The target processor memory size in bytes. */
 #define CONFIGURATION_TARGET_PROCESSOR_MEMORY_SIZE 65536
 /** The target processor firmware base address. */
-#define CONFIGURATION_FIRMWARE_BASE_ADDRESS 0x0400
+#define CONFIGURATION_FIRMWARE_BASE_ADDRESS 0x0300
 
 #if CONFIGURATION_ENABLE_DEBUG == 1
 	#define Debug(Format, ...) printf(Format, ##__VA_ARGS__)

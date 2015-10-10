@@ -2,6 +2,7 @@
  * @see Protocol.h for description.
  * @author Adrien RICCIARDI
  */
+#include <unistd.h> // Needed by usleep()
 #include "Configuration.h"
 #include "Hex_Parser.h"
 #include "Protocol.h"
@@ -26,7 +27,8 @@ typedef enum
 {
 	PROTOCOL_COMMAND_GET_BATTERY_VOLTAGE,
 	PROTOCOL_COMMAND_GET_DISTANCE_SENSOR_VALUE,
-	PROTOCOL_COMMAND_START_FIRMWARE_UPDATE
+	PROTOCOL_COMMAND_START_FIRMWARE_UPDATE,
+	PROTOCOL_COMMAND_GET_RUNNING_MODE
 } TProtocolCommand;
 
 //-------------------------------------------------------------------------------------------------
@@ -66,11 +68,15 @@ int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 	// Start sending instructions from the firmware beginning
 	Pointer_Memory = &Microcontroller_Memory[CONFIGURATION_FIRMWARE_BASE_ADDRESS];
 	
-	// Send the "start update" command to make the firmware reboot in bootloader mode
-	/*Debug("[MainUpdateFirmware] Rebooting in bootloader mode...\n");
-	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
-	UARTWriteByte(MAIN_PROTOCOL_COMMAND_START_FIRMWARE_UPDATE);
-	usleep(200000); // Wait some time to let the MCU reboot*/
+	// Reboot the microcontroller in bootloader mode if it is executing the firmware
+	if (ProtocolGetRunningMode() == 1)
+	{
+		// Send the "start update" command to make the firmware reboot in bootloader mode
+		Debug("[%s] Rebooting in bootloader mode...\n", __func__);
+		UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
+		UARTWriteByte(PROTOCOL_COMMAND_START_FIRMWARE_UPDATE);
+		usleep(200000); // Wait some time to let the microcontroller reboot
+	}
 	
 	// Send the "start update" command another time to start the update procedure
 	Debug("[%s] Starting the update procedure...\n", __func__);
@@ -105,4 +111,13 @@ int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 	}
 	
 	return 0;
+}
+
+int ProtocolGetRunningMode(void)
+{
+	// Send the command
+	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
+	UARTWriteByte(PROTOCOL_COMMAND_GET_RUNNING_MODE);
+	
+	return UARTReadByte();
 }

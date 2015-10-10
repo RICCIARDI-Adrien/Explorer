@@ -28,4 +28,10 @@ int ProtocolGetSonarDistance(int *Pointer_Distance_Centimeters);
  */
 int ProtocolUpdateFirmware(char *String_Firmware_Hex_File);
 
+/** Get the microcontroller currently running software.
+ * @return 0 if the microcontroller is running its bootloader,
+ * @return 1 if the microcontroller is running its firmware.
+ */
+int ProtocolGetRunningMode(void);
+
 #endif

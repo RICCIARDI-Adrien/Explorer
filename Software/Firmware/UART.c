@@ -7,10 +7,13 @@
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
-// Private constants
+// Private constants and macros
 //--------------------------------------------------------------------------------------------------
 /** The frequency divider value to achieve a 115200 bit/s baud rate. */
 #define UART_BAUD_RATE_DIVIDER 138
+
+/** Disable the UART transmission interrupt. */
+#define UART_DISABLE_TRANSMISSION_INTERRUPT() pie3.TX2IE = 0
 
 /** The protocol magic number. */
 #define UART_PROTOCOL_MAGIC_NUMBER 0xA5
@@ -25,7 +28,8 @@ typedef enum
 {
 	UART_COMMAND_GET_BATTERY_VOLTAGE,
 	UART_COMMAND_GET_DISTANCE_SENSOR_VALUE,
-	UART_COMMAND_START_FIRMWARE_UPDATE
+	UART_COMMAND_START_FIRMWARE_UPDATE,
+	UART_COMMAND_GET_RUNNING_MODE
 } TUARTCommand;
 
 //--------------------------------------------------------------------------------------------------
@@ -107,6 +111,11 @@ void UARTInterruptHandler(void)
 					// set the flag
 					// reboot
 					
+				case UART_COMMAND_GET_RUNNING_MODE:
+					UART_DISABLE_TRANSMISSION_INTERRUPT(); // Disable the transmission interrupt as only one byte will be sent
+					UARTStartAnswerTransmission(1);
+					break;
+					
 				// Unknown command, do nothing
 				default:
 					break;
@@ -120,7 +129,7 @@ void UARTInterruptHandler(void)
 	if (pie3.TX2IE && pir3.TX2IF)
 	{
 		// Disable the transmission interrupt as it is the last byte to send
-		pie3.TX2IE = 0;
+		UART_DISABLE_TRANSMISSION_INTERRUPT();
 	
 		// Send the command answer second byte
 		txreg2 = Command_Answer[1];
