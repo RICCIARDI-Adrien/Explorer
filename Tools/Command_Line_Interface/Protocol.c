@@ -75,7 +75,7 @@ int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 		Debug("[%s] Rebooting in bootloader mode...\n", __func__);
 		UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
 		UARTWriteByte(PROTOCOL_COMMAND_START_FIRMWARE_UPDATE);
-		usleep(200000); // Wait some time to let the microcontroller reboot
+		usleep(500000); // Wait some time to let the microcontroller reboot
 	}
 	
 	// Send the "start update" command another time to start the update procedure

@@ -1,7 +1,7 @@
 [Settings]
 Target=PIC18F26K22
 Active Compiler=BoostC
-Active Directory=C:\Documents and Settings\Administrateur\Mes documents\Explorer\Software\Bootloader\
+Active Directory=C:\Documents and Settings\Administrateur\Mes documents\Explorer\Software\Firmware\
 Active Config=Release
 Last Ext=h
 Last ExtIdx=1

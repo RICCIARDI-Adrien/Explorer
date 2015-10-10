@@ -26,7 +26,7 @@ void FlashWriteBlock(unsigned long Block_Address, unsigned char *Pointer_Data_Bu
 	unsigned char i;
 
 	// Erase the block
-	// Load the block start address
+	// Load the block starting address
 	tblptru = Block_Address >> 16;
 	tblptrh = Block_Address >> 8;
 	tblptrl = (unsigned char) Block_Address;
@@ -35,7 +35,7 @@ void FlashWriteBlock(unsigned long Block_Address, unsigned char *Pointer_Data_Bu
 	// Execute the special write sequence
 	eecon2 = 0x55;
 	eecon2 = 0xAA;
-	// Start the erase cycle
+	// Start the erase cycle (the core will stall until the erase cycle is finished)
 	eecon1.WR =1;
 	
 	// Write the block

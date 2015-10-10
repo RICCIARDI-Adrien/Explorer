@@ -4,6 +4,7 @@
  */
 #include <system.h>
 #include "ADC.h"
+#include "Flash.h"
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -12,6 +13,8 @@
 /** The frequency divider value to achieve a 115200 bit/s baud rate. */
 #define UART_BAUD_RATE_DIVIDER 138
 
+/** Enable the UART transmission interrupt. */
+#define UART_ENABLE_TRANSMISSION_INTERRUPT() pie3.TX2IE = 1
 /** Disable the UART transmission interrupt. */
 #define UART_DISABLE_TRANSMISSION_INTERRUPT() pie3.TX2IE = 0
 
@@ -19,6 +22,9 @@
 #define UART_PROTOCOL_MAGIC_NUMBER 0xA5
 /** How many bytes are expected as answer. */
 #define UART_PROTOCOL_COMMAND_ANSWER_SIZE 2
+
+/** The update flag location. */
+#define UART_UPDATE_FLAG_ADDRESS 0xFFC0 //The PIC18F26K22 flash last block
 
 //--------------------------------------------------------------------------------------------------
 // Private types
@@ -35,16 +41,28 @@ typedef enum
 //--------------------------------------------------------------------------------------------------
 // Private functions
 //--------------------------------------------------------------------------------------------------
-/** Start transmitting the answer.
- * @param Answer_First_Byte The first byte to send.
+/** Start transmitting a single byte.
+ * @param Byte The byte to send.
  */
-static void UARTStartAnswerTransmission(unsigned char Answer_First_Byte)
+inline void UARTStartOneByteTransmission(unsigned char Byte)
 {
-	// Enable the transmission interrupt
-	pie3.TX2IE = 1;
+	// Disable the transmission interrupt as only one byte will be sent
+	UART_DISABLE_TRANSMISSION_INTERRUPT();
 	
 	// Start transmission
-	txreg2 = Answer_First_Byte;
+	txreg2 = Byte;
+}
+
+/** Start transmitting two bytes.
+ * @param First_Byte The first byte to send.
+ */
+inline void UARTStartTwoBytesTransmission(unsigned char First_Byte)
+{
+	// Enable the transmission interrupt to send the second byte when the first one has been sent
+	UART_ENABLE_TRANSMISSION_INTERRUPT();
+	
+	// Start transmission
+	txreg2 = First_Byte;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -94,7 +112,7 @@ void UARTInterruptHandler(void)
 					Word = ADCGetLastSampledBatteryVoltage();
 					Command_Answer[0] = Word >> 8;
 					Command_Answer[1] = (unsigned char) Word;
-					UARTStartAnswerTransmission(Command_Answer[0]);
+					UARTStartTwoBytesTransmission(Command_Answer[0]);
 					break;
 					
 				case UART_COMMAND_GET_DISTANCE_SENSOR_VALUE:
@@ -103,17 +121,18 @@ void UARTInterruptHandler(void)
 						Command_Answer[0] = 0x23;
 						Command_Answer[1] = 0x45;
 						//latb.5=1;latb.4=0;
-					UARTStartAnswerTransmission(Command_Answer[0]);
+					UARTStartTwoBytesTransmission(Command_Answer[0]);
 					break;
 				
 				case UART_COMMAND_START_FIRMWARE_UPDATE:
-					// TODO
-					// set the flag
-					// reboot
+					// Set the update flag to 0xFF
+					FlashEraseBlock(UART_UPDATE_FLAG_ADDRESS);
+					// Reboot the microcontroller
+					asm reset;
+					while (1); // Wait for the reset to happen
 					
 				case UART_COMMAND_GET_RUNNING_MODE:
-					UART_DISABLE_TRANSMISSION_INTERRUPT(); // Disable the transmission interrupt as only one byte will be sent
-					UARTStartAnswerTransmission(1);
+					UARTStartOneByteTransmission(1);
 					break;
 					
 				// Unknown command, do nothing

@@ -78,7 +78,7 @@ void main(void)
 		LedInitialize();
 		UARTInitialize();
 		
-		LedOnGreen();
+		LedOnRed();
 		
 		// TODO stop the motors ?
 		
