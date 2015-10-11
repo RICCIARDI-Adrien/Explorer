@@ -4,6 +4,8 @@
  */
 #include <system.h>
 #include "ADC.h"
+#include "Distance_Sensor.h"
+#include "Motor.h"
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -37,6 +39,8 @@ void main(void)
 	// Initialize the peripherals
 	UARTInitialize();
 	ADCInitialize();
+	DistanceSensorInitialize();
+	MotorInitialize();
 	
 	// Enable the interrupts
 	rcon.IPEN = 1; // Enable interrupt priority
@@ -48,12 +52,30 @@ void main(void)
 	
 	latb.5 = 0;
 	latb.4 = 1;
-
+	
+	MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
+	delay_s(4);
+	MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
+	delay_s(4);
+	MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
+	delay_s(4);
+	MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
+	delay_s(4);
+	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
+	delay_s(4);
+	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
+	delay_s(4);
+	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
+	delay_s(4);
+	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
+	delay_s(4);
+	
 	while (1)
 	{
 		latb.5 = !portb.5;
 		latb.4 = !portb.4;
 		
-		delay_s(1);
+		delay_ms(200);
+		delay_ms(200);
 	}
 }

@@ -51,7 +51,7 @@ unsigned short ADCGetLastSampledBatteryVoltage(void)
 {
 	unsigned short Voltage;
 	
-	// Atomically access to the shared value
+	// Atomically access to the shared variable
 	ADC_DISABLE_TIMER_0_INTERRUPT();
 	Voltage = ADC_Last_Sampled_Voltage;
 	ADC_ENABLE_TIMER_0_INTERRUPT();

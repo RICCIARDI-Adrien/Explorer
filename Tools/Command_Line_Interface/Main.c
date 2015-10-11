@@ -58,6 +58,11 @@ int main(int argc, char *argv[])
 			goto Exit;
 		}
 	}
+	else
+	{
+		printf("Error : unknown command.\n");
+		Return_Value = EXIT_FAILURE;
+	}
 
 Exit:
 	UARTClose();

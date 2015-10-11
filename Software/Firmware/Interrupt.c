@@ -4,6 +4,7 @@
  */
 #include <system.h>
 #include "ADC.h"
+#include "Motor.h"
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -20,4 +21,7 @@ void interrupt_low(void)
 	
 	// Timer 0 interrupt (which starts the battery sampling)
 	if (intcon.TMR0IF) ADCInterruptHandler();
+	
+	// Handle the motors speed
+	MotorInterruptHandler(); // The interrupt flags are checked in the function
 }
