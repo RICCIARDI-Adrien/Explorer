@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
 	}
 	
 	// Select the right command
-	if (strcmp(String_Command, "-v") == 0) printf("Battery voltage : %0.3f V\n", ProtocolGetBatteryVoltage());
+	if (strcmp(String_Command, "-d") == 0) printf("Distance to the nearest object : %d cm\n", ProtocolGetSonarDistance());
+	else if (strcmp(String_Command, "-v") == 0) printf("Battery voltage : %0.3f V\n", ProtocolGetBatteryVoltage());
 	else if (strcmp(String_Command, "-u") == 0)
 	{
 		// Get the Hex file parameter

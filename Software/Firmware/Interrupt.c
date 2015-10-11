@@ -4,7 +4,9 @@
  */
 #include <system.h>
 #include "ADC.h"
+#include "Distance_Sensor.h"
 #include "Motor.h"
+#include "Shared_Timer.h"
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -12,16 +14,18 @@
 //--------------------------------------------------------------------------------------------------
 void interrupt(void)
 {
+	// External interrupt 1
+	if (intcon3.INT1IE && intcon3.INT1IF) DistanceSensorInterruptHandler();
 }
 
 void interrupt_low(void)
 {
-	// UART interrupts
+	// UART RX and TX interrupts
 	if (pir3.RC2IF || pir3.TX2IF) UARTInterruptHandler();
 	
-	// Timer 0 interrupt (which starts the battery sampling)
-	if (intcon.TMR0IF) ADCInterruptHandler();
-	
 	// Handle the motors speed
-	MotorInterruptHandler(); // The interrupt flags are checked in the function
+	MotorInterruptHandler(); // The relevant interrupt flags are checked in the function
+	
+	// Timer 3 interrupts
+	if (pie2.TMR3IE && pir2.TMR3IF) SharedTimerInterruptHandler();
 }

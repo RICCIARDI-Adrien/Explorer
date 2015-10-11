@@ -4,14 +4,7 @@
  */
 #include <system.h>
 #include "ADC.h"
-
-//--------------------------------------------------------------------------------------------------
-// Private constants and macros
-//--------------------------------------------------------------------------------------------------
-/** Enable the timer 0 interrupt. */
-#define ADC_ENABLE_TIMER_0_INTERRUPT() intcon.TMR0IE = 1
-/** Disable the timer 0 interrupt. */
-#define ADC_DISABLE_TIMER_0_INTERRUPT() intcon.TMR0IE = 0
+#include "Shared_Timer.h"
 
 //--------------------------------------------------------------------------------------------------
 // Private variables
@@ -37,29 +30,9 @@ void ADCInitialize(void)
 	adcon0.GO = 1;
 	while (adcon0.GO); // Wait for the conversion to finish
 	ADC_Last_Sampled_Voltage = ((adresh & 0x03) << 8) | adresl;
-	
-	// Configure the timer0 to overflow every second
-	t0con = 0x87; // Enable the timer in 16-bit mode, use Fosc/4 as clock source, use a 1:256 prescaler
-	
-	// Enable the timer interrupt
-	intcon2.TMR0IP = 0; // Set the interrupt as low priority
-	intcon.TMR0IF = 0; // Reset the interrupt flag
-	ADC_ENABLE_TIMER_0_INTERRUPT();
 }
 
-unsigned short ADCGetLastSampledBatteryVoltage(void)
-{
-	unsigned short Voltage;
-	
-	// Atomically access to the shared variable
-	ADC_DISABLE_TIMER_0_INTERRUPT();
-	Voltage = ADC_Last_Sampled_Voltage;
-	ADC_ENABLE_TIMER_0_INTERRUPT();
-	
-	return Voltage;
-}
-
-void ADCInterruptHandler(void)
+void ADCScheduleBatteryVoltageSampling(void)
 {
 	// Store the last sampled value
 	ADC_Last_Sampled_Voltage = ((adresh & 0x03) << 8) | adresl;
@@ -68,7 +41,16 @@ void ADCInterruptHandler(void)
 	
 	// Start a new conversion
 	adcon0.GO = 1;
+}
 
-	// Reset the interrupt flag
-	intcon.TMR0IF = 0;
+unsigned short ADCGetLastSampledBatteryVoltage(void)
+{
+	unsigned short Voltage;
+	
+	// Atomically access to the shared variable
+	SHARED_TIMER_DISABLE_INTERRUPT();
+	Voltage = ADC_Last_Sampled_Voltage;
+	SHARED_TIMER_ENABLE_INTERRUPT();
+	
+	return Voltage;
 }

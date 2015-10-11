@@ -13,12 +13,10 @@
  */
 float ProtocolGetBatteryVoltage(void);
 
-/** Get the distance between the robot and something in front of it.
- * @param Pointer_Distance_Centimeters On output, contain the distance from the nearest object converted to cm.
- * @return 0 if the distance was successfully retrieved, TODO
- * @return 1 if a communication error occurred. TODO comme voltage
+/** Get the distance between the robot and the nearest object in front of it.
+ * @return the distance in centimeters.
  */
-int ProtocolGetSonarDistance(int *Pointer_Distance_Centimeters);
+int ProtocolGetSonarDistance(void);
 
 /** Update the robot firmware.
  * @param String_Firmware_Hex_File The Intel Hex file containing the firmware.

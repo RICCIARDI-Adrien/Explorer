@@ -5,7 +5,9 @@
 #include <system.h>
 #include "ADC.h"
 #include "Distance_Sensor.h"
+#include "Led.h"
 #include "Motor.h"
+#include "Shared_Timer.h"
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -41,35 +43,21 @@ void main(void)
 	ADCInitialize();
 	DistanceSensorInitialize();
 	MotorInitialize();
+	SharedTimerInitialize();
+	LedInitialize();
 	
 	// Enable the interrupts
 	rcon.IPEN = 1; // Enable interrupt priority
 	intcon |= 0xC0; // Enable all high priority and all low priority interrupts
 	
+	// Stop the motors
+	MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
+	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
+	
+	// System is ready
+	LedOnGreen();
+	
 	// TEST
-	trisb.5 = 0;
-	trisb.4 = 0;
-	
-	latb.5 = 0;
-	latb.4 = 1;
-	
-	MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-	delay_s(4);
-	MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-	delay_s(4);
-	MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-	delay_s(4);
-	MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-	delay_s(4);
-	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-	delay_s(4);
-	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-	delay_s(4);
-	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-	delay_s(4);
-	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-	delay_s(4);
-	
 	while (1)
 	{
 		latb.5 = !portb.5;

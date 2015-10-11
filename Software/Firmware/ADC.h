@@ -11,11 +11,11 @@
 /** Initialize the ADC module to sample the battery voltage. */
 void ADCInitialize(void);
 
+/** Start a new battery voltage sampling. */
+void ADCScheduleBatteryVoltageSampling(void);
+
 /** Return the last sampled battery voltage value.
  * @return The raw value of the last sampled battery voltage. */
 unsigned short ADCGetLastSampledBatteryVoltage(void);
-
-/** The ADC interrupt handler. */
-void ADCInterruptHandler(void);
 
 #endif

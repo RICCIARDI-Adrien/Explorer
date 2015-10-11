@@ -50,6 +50,15 @@ float ProtocolGetBatteryVoltage(void)
 	return (15.f * Raw_Voltage) / 1023.f;
 }
 
+int ProtocolGetSonarDistance(void)
+{
+	// Send the command
+	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
+	UARTWriteByte(PROTOCOL_COMMAND_GET_DISTANCE_SENSOR_VALUE);
+	
+	return (UARTReadByte() << 8) | UARTReadByte();
+}
+
 int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 {
 	unsigned char Microcontroller_Memory[CONFIGURATION_TARGET_PROCESSOR_MEMORY_SIZE], Byte, *Pointer_Memory;

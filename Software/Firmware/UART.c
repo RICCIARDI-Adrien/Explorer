@@ -4,6 +4,7 @@
  */
 #include <system.h>
 #include "ADC.h"
+#include "Distance_Sensor.h"
 #include "Flash.h"
 #include "UART.h"
 
@@ -116,11 +117,9 @@ void UARTInterruptHandler(void)
 					break;
 					
 				case UART_COMMAND_GET_DISTANCE_SENSOR_VALUE:
-					// TODO
-						// TEST
-						Command_Answer[0] = 0x23;
-						Command_Answer[1] = 0x45;
-						//latb.5=1;latb.4=0;
+					Word = DistanceSensorGetLastSampledDistance();
+					Command_Answer[0] = Word >> 8;
+					Command_Answer[1] = (unsigned char) Word;
 					UARTStartTwoBytesTransmission(Command_Answer[0]);
 					break;
 				

@@ -37,7 +37,7 @@
 // Private variables
 //--------------------------------------------------------------------------------------------------
 /** Each motor current duty cycle. */
-static unsigned short Motor_Current_Duty_Cycle[MOTORS_COUNT] = {0};
+static unsigned short Motor_Current_Duty_Cycle[MOTORS_COUNT];
 
 //--------------------------------------------------------------------------------------------------
 // Public functions
