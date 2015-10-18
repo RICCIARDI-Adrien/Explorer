@@ -14,12 +14,6 @@
 //--------------------------------------------------------------------------------------------------
 // Functions
 //--------------------------------------------------------------------------------------------------
-/** Read a single byte from the flash memory.
- * @param Byte_Address The byte to read address.
- * @return the byte value.
- */
-unsigned char FlashReadByte(unsigned long Byte_Address);
-
 /** Erase the specified block and write the provided data.
  * @param Block_Address The block beginning address.
  * @param Pointer_Data_Buffer The data to write. The buffer must be FLASH_BLOCK_SIZE bytes.

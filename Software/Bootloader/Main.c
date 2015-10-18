@@ -30,17 +30,13 @@
 //--------------------------------------------------------------------------------------------------
 /** The firmware base address. */
 #define MAIN_FIRMWARE_BASE_ADDRESS 0x300
-/** The update flag location. */
-#define MAIN_UPDATE_FLAG_ADDRESS 0xFFC0 //The PIC18F26K22 flash last block
 
 /** The protocol magic number. */
 #define MAIN_PROTOCOL_MAGIC_NUMBER 0xA5
-/** The "start update" command. */
-#define MAIN_PROTOCOL_COMMAND_START_FIRMWARE_UPDATE 2
-/** The "get running mode" command. */
-#define MAIN_PROTOCOL_COMMAND_GET_RUNNING_MODE 3
 /** The bootloader acknowledges that it has received and flashed a block. */
 #define MAIN_PROTOCOL_ACKNOWLEDGE 0x42
+/** How many milliseconds to wait for the PC to answer. */
+#define MAIN_PROTOCOL_ANSWER_WAITING_TIME 200 // Warning : this value is stored on an unsigned char
 
 //--------------------------------------------------------------------------------------------------
 // Private functions
@@ -62,7 +58,7 @@ static void MainLowPriorityInterruptRedirection(void) @ 0x18
 //--------------------------------------------------------------------------------------------------
 void main(void)
 {
-	unsigned char Is_Magic_Number_Received = 0, Byte, i, Block_Buffer[FLASH_BLOCK_SIZE], Bytes_To_Receive_Count;
+	unsigned char Byte, i, Block_Buffer[FLASH_BLOCK_SIZE], Bytes_To_Receive_Count;
 	unsigned short Firmware_Size;
 	unsigned long Block_Address = MAIN_FIRMWARE_BASE_ADDRESS;
 	
@@ -70,43 +66,38 @@ void main(void)
 	osctune = 0x40; // Enable the 4x PLL
 	osccon2 = 0; // Disable the secondary clock, disable the primary clock external oscillator circuit
 	osccon = 0x78; // Set internal oscillator block frequency to 16MHz, use the clock defined by FOSC bits, use primary clock as core clock
+	while (!osccon2.PLLRDY); // Wait for the PLL to lock
 	
-	// Is the update flag byte location erased ?
-	if (FlashReadByte(MAIN_UPDATE_FLAG_ADDRESS) == 0xFF)
+	// Initialize the peripherals
+	LedInitialize();
+	UARTInitialize();
+	
+	LedOnRed();
+	
+	// Send an handshake code to the PC
+	UARTWriteByte(MAIN_PROTOCOL_MAGIC_NUMBER);
+	
+	// Wait some time for the PC to answer
+	for (i = 0; i < MAIN_PROTOCOL_ANSWER_WAITING_TIME; i++)
 	{
-		// Initialize the peripherals
-		LedInitialize();
-		UARTInitialize();
-		
-		LedOnRed();
-		
-		// TODO stop the motors ?
-		
-		// Wait for the "start programming" command
-		while (1)
+		// Stop waiting if the correct answer has been received
+		if (UARTIsByteReceived())
 		{
-			Byte = UARTReadByte();
-			
-			// Wait for the magic number
-			if (!Is_Magic_Number_Received && (Byte == MAIN_PROTOCOL_MAGIC_NUMBER)) Is_Magic_Number_Received = 1;
-			// Wait for the command if the magic number was received
-			else if (Is_Magic_Number_Received)
-			{
-				if (Byte == MAIN_PROTOCOL_COMMAND_START_FIRMWARE_UPDATE) break;
-				// Tell the PC that the microcontroller is in bootloader mode
-				else if (Byte == MAIN_PROTOCOL_COMMAND_GET_RUNNING_MODE) UARTWriteByte(0);
-
-				Is_Magic_Number_Received = 0;
-			}
+			if (UARTReadByte() == MAIN_PROTOCOL_MAGIC_NUMBER) break;
 		}
-		
+		delay_ms(1);
+	}
+	
+	// The waiting loop has been interrupted before its end, so the PC answered
+	if (i < MAIN_PROTOCOL_ANSWER_WAITING_TIME)
+	{		
 		// Receive the firmware size
 		Firmware_Size = (UARTReadByte() << 8) | UARTReadByte();
 		
 		// Receive the firmware data and flash it
 		while (Firmware_Size > 0)
 		{
-			// Compute the amount of bytes to received
+			// Compute the amount of bytes to receive
 			if (Firmware_Size >= FLASH_BLOCK_SIZE) Bytes_To_Receive_Count = FLASH_BLOCK_SIZE;
 			else Bytes_To_Receive_Count = Firmware_Size;
 		
@@ -122,12 +113,9 @@ void main(void)
 			
 			Firmware_Size -= Bytes_To_Receive_Count;
 		}
-		
-		// Set the update flag
-		Block_Buffer[0] = 0x42; // Everything but 0xFF
-		FlashWriteBlock(MAIN_UPDATE_FLAG_ADDRESS, Block_Buffer);
 			
 		// Reboot the microcontroller
+		delay_ms(1); // Let enough time to transmit the last acknowledge
 		asm reset;
 	}
 	// Boot the firmware

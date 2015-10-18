@@ -8,19 +8,6 @@
 //--------------------------------------------------------------------------------------------------
 // Public functions
 //--------------------------------------------------------------------------------------------------
-unsigned char FlashReadByte(unsigned long Byte_Address)
-{
-	// Load the byte address
-	tblptru = Byte_Address >> 16;
-	tblptrh = Byte_Address >> 8;
-	tblptrl = (unsigned char) Byte_Address;
-	
-	// Read the byte
-	asm tblrd*;
-	
-	return tablat;
-}
-
 void FlashWriteBlock(unsigned long Block_Address, unsigned char *Pointer_Data_Buffer)
 {
 	unsigned char i;
@@ -50,8 +37,6 @@ void FlashWriteBlock(unsigned long Block_Address, unsigned char *Pointer_Data_Bu
 		asm tblwt*+; // Write the byte to the next holding register and automatically increment the address
 		Pointer_Data_Buffer++;
 	}
-	//// Set the address another time as the 5 LSb of the low register have changed
-	//tblptrl = (unsigned char) Block_Address;
 	// Return to the good block without setting the address another time
 	asm tblrd*-;
 	// Configure a write cycle

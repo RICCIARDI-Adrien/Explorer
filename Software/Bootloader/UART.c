@@ -37,6 +37,12 @@ unsigned char UARTReadByte(void)
 	return rcreg2;
 }
 
+unsigned char UARTIsByteReceived(void)
+{
+	if (pir3.RC2IF) return 1;
+	return 0;
+}
+
 void UARTWriteByte(unsigned char Byte)
 {
 	// Wait for the transmit buffer and FIFO to become free

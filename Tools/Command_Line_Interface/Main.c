@@ -25,7 +25,11 @@ int main(int argc, char *argv[])
 			"Available commands :\n"
 			"   -d : get the sonar distance from the nearest object\n"
 			"   -v : get the battery voltage\n"
-			"   -u Hex_File : update the robot firmware from an Intel Hex file\n" , argv[0]);
+			"   -u Hex_File : update the robot firmware from an Intel Hex file\n"
+			"How to update the robot firmware :\n"
+			"   1) Turn the robot off\n"
+			"   2) Start this program in update mode\n"
+			"   3) Turn the robot on\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 	String_Serial_Port_File = argv[1];

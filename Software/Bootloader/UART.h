@@ -16,6 +16,12 @@ void UARTInitialize(void);
  */
 unsigned char UARTReadByte(void);
 
+/** Tell if a byte has been received or not.
+ * @return 1 if a byte is available to read,
+ * @return 0 if no byte was received.
+ */
+unsigned char UARTIsByteReceived(void);
+
 /** Write a byte to the UART.
  * @param Byte The byte to send.
  */

@@ -26,9 +26,7 @@
 typedef enum
 {
 	PROTOCOL_COMMAND_GET_BATTERY_VOLTAGE,
-	PROTOCOL_COMMAND_GET_DISTANCE_SENSOR_VALUE,
-	PROTOCOL_COMMAND_START_FIRMWARE_UPDATE,
-	PROTOCOL_COMMAND_GET_RUNNING_MODE
+	PROTOCOL_COMMAND_GET_DISTANCE_SENSOR_VALUE
 } TProtocolCommand;
 
 //-------------------------------------------------------------------------------------------------
@@ -39,10 +37,13 @@ float ProtocolGetBatteryVoltage(void)
 	int Raw_Voltage;
 	
 	// Send the command
+	Debug("[%s] Sending magic number...\n", __func__);
 	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
+	Debug("[%s] Sending command...\n", __func__);
 	UARTWriteByte(PROTOCOL_COMMAND_GET_BATTERY_VOLTAGE);
 	
 	// Receive the raw voltage
+	Debug("[%s] Waiting for answer...\n", __func__);
 	Raw_Voltage = (UARTReadByte() << 8) | UARTReadByte();
 	Debug("[%s] Raw voltage : %d.\n", __func__, Raw_Voltage);
 	
@@ -52,11 +53,21 @@ float ProtocolGetBatteryVoltage(void)
 
 int ProtocolGetSonarDistance(void)
 {
+	int Raw_Distance;
+	
 	// Send the command
+	Debug("[%s] Sending magic number...\n", __func__);
 	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
+	Debug("[%s] Sending command...\n", __func__);
 	UARTWriteByte(PROTOCOL_COMMAND_GET_DISTANCE_SENSOR_VALUE);
 	
-	return (UARTReadByte() << 8) | UARTReadByte();
+	// Receive the raw distance
+	Debug("[%s] Waiting for answer...\n", __func__);
+	Raw_Distance = (UARTReadByte() << 8) | UARTReadByte();
+	Debug("[%s] Raw distance : %d ms.\n", __func__, Raw_Distance);
+	
+	// Convert it to centimeters
+	return Raw_Distance / 48;
 }
 
 int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
@@ -77,20 +88,16 @@ int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 	// Start sending instructions from the firmware beginning
 	Pointer_Memory = &Microcontroller_Memory[CONFIGURATION_FIRMWARE_BASE_ADDRESS];
 	
-	// Reboot the microcontroller in bootloader mode if it is executing the firmware
-	if (ProtocolGetRunningMode() == 1)
+	// Wait for the microcontroller's bootloader "ready" code
+	printf("Waiting for the bootloader code...\n");
+	do
 	{
-		// Send the "start update" command to make the firmware reboot in bootloader mode
-		Debug("[%s] Rebooting in bootloader mode...\n", __func__);
-		UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
-		UARTWriteByte(PROTOCOL_COMMAND_START_FIRMWARE_UPDATE);
-		usleep(500000); // Wait some time to let the microcontroller reboot
-	}
+		Byte = UARTReadByte();
+		Debug("[%s] Received byte : 0x%02X.\n", __func__, Byte);
+	} while (Byte != PROTOCOL_MAGIC_NUMBER);
 	
-	// Send the "start update" command another time to start the update procedure
-	Debug("[%s] Starting the update procedure...\n", __func__);
+	// Send the same code to the bootloader to enter programming mode
 	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
-	UARTWriteByte(PROTOCOL_COMMAND_START_FIRMWARE_UPDATE);
 	
 	// Send the firmware size
 	Debug("[%s] Sending the firmware size...\n", __func__);
@@ -118,15 +125,7 @@ int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 			return 2;
 		}
 	}
+	printf("Firmware successfully updated.\n");
 	
 	return 0;
-}
-
-int ProtocolGetRunningMode(void)
-{
-	// Send the command
-	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
-	UARTWriteByte(PROTOCOL_COMMAND_GET_RUNNING_MODE);
-	
-	return UARTReadByte();
 }
