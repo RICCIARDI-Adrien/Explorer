@@ -99,7 +99,7 @@ void main(void)
 		{
 			// Compute the amount of bytes to receive
 			if (Firmware_Size >= FLASH_BLOCK_SIZE) Bytes_To_Receive_Count = FLASH_BLOCK_SIZE;
-			else Bytes_To_Receive_Count = Firmware_Size;
+			else Bytes_To_Receive_Count = (unsigned char) Firmware_Size;
 		
 			// Receive up to a full block of data
 			for (i = 0; i < Bytes_To_Receive_Count; i++) Block_Buffer[i] = UARTReadByte();
