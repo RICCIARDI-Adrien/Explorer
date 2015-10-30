@@ -44,12 +44,12 @@ static unsigned short Motor_Current_Duty_Cycle[MOTORS_COUNT];
 //--------------------------------------------------------------------------------------------------
 void MotorInitialize(void)
 {
-	// Configure PWM pins as outputs
-	trisc.MOTOR_LEFT_PIN = 0;
-	trisc.MOTOR_RIGHT_PIN = 0;
 	// Configure the pins as digital
 	anselc.MOTOR_LEFT_PIN = 0;
 	anselc.MOTOR_RIGHT_PIN = 0;
+	// Configure PWM pins as outputs
+	trisc.MOTOR_LEFT_PIN = 0;
+	trisc.MOTOR_RIGHT_PIN = 0;
 	
 	// Stop motors
 	portc.MOTOR_LEFT_PIN = 0;
@@ -65,9 +65,9 @@ void MotorInitialize(void)
 	// Configure the timer 1 to generate a 50Hz frequency
 	tmr1h = MOTOR_PWM_TIMER_RELOAD_VALUE >> 8;
 	tmr1l = (unsigned char) MOTOR_PWM_TIMER_RELOAD_VALUE;
-	ipr1.TMR1IP = 0; // Set the timer 1 as a low priority interrupt
-	pie1.TMR1IE = 1; // Enable the timer 1 interrupt
 	t1con = 0x33; // Use Fosc/4 as clock source, use a 8x prescaler, disable the dedicated secondary oscillator circuit, access to the timer registers in one 16-bit operation, enable the timer
+	ipr1.TMR1IP = 0; // Set the timer 1 as a low priority interrupt
+	pie1.TMR1IE = 1; // Enable the timer 1 interrupt	
 }
 
 void MotorInterruptHandler(void)
