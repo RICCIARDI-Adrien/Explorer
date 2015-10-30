@@ -13,6 +13,8 @@
 void SharedTimerInitialize(void)
 {
 	// Configure the timer 3 to trigger an interrupt at a 30Hz frequency (the lowest frequency that can be achieved with the available input clocks)
+	tmr3h = 0xFF; // Trigger an interrupt immediately after they are enabled
+	tmr3l = 0xFF;
 	t3con = 0x33; // Use Fosc/4 as clock source, use a 8x prescaler, disable the dedicated secondary oscillator circuit, access to the timer registers in one 16-bit operation, enable the timer
 	
 	// Enable timer 3 interrupt
