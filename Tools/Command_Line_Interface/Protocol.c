@@ -64,15 +64,16 @@ int ProtocolGetSonarDistance(void)
 	// Receive the raw distance
 	Debug("[%s] Waiting for answer...\n", __func__);
 	Raw_Distance = (UARTReadByte() << 8) | UARTReadByte();
-	Debug("[%s] Raw distance : %d ms.\n", __func__, Raw_Distance);
+	Debug("[%s] Measured time : %d ms.\n", __func__, Raw_Distance);
 	
 	// Convert it to centimeters
-	return Raw_Distance / 48;
+	return Raw_Distance / 58;
 }
 
 int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 {
-	unsigned char Microcontroller_Memory[CONFIGURATION_TARGET_PROCESSOR_MEMORY_SIZE], Byte, *Pointer_Memory;
+	static unsigned char Microcontroller_Memory[CONFIGURATION_TARGET_PROCESSOR_MEMORY_SIZE];
+	unsigned char Byte, *Pointer_Memory;
 	int Firmware_Size, Bytes_To_Send_Count;
 	
 	// Convert the Hex file into something usable

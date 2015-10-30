@@ -158,7 +158,8 @@ int HexParserConvertHexToBinary(char *String_Hex_File, int Microcontroller_Memor
 				if (Current_Address < Microcontroller_Memory_Size) memcpy(&Pointer_Microcontroller_Memory[Current_Address], Data, Data_Size);
 				
 				// Find the highest address used in the program, so we can omit the remaining memory and shorten the output file (in order to shorten the flashing time)
-				if ((Current_Address < Microcontroller_Memory_Size) && Current_Address > Highest_Address) Highest_Address = Current_Address;
+				Data_Size += Current_Address; // Compute the last address of this record into Data_Size (recycling the variable)
+				if ((Current_Address < Microcontroller_Memory_Size) && (Data_Size > Highest_Address)) Highest_Address = Data_Size;
 				break;
 				
 			case HEX_PARSER_RECORD_TYPE_END_OF_FILE:
