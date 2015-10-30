@@ -33,12 +33,7 @@
 //--------------------------------------------------------------------------------------------------
 void main(void)
 {
-	// Set core clock to 64MHz
-	osctune = 0x40; // Enable the 4x PLL
-	osccon2 = 0; // Disable the secondary clock, disable the primary clock external oscillator circuit
-	osccon = 0x78; // Set internal oscillator block frequency to 16MHz, use the clock defined by FOSC bits, use primary clock as core clock
-	
-	// Initialize the peripherals
+	// Initialize the peripherals (there is no need to initialize the clock as the bootloader already did)
 	UARTInitialize();
 	ADCInitialize();
 	DistanceSensorInitialize();
@@ -57,13 +52,11 @@ void main(void)
 	// System is ready
 	LedOnGreen();
 	
-	// TEST
 	while (1)
 	{
-		latb.5 = !portb.5;
-		latb.4 = !portb.4;
-		
-		delay_ms(200);
-		delay_ms(200);
+		LedOnGreen();
+		delay_ms(250);
+		LedOnRed();
+		delay_ms(250);
 	}
 }
