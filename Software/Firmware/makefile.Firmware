@@ -5,13 +5,13 @@ Release:
 
 CC = "C:\Program Files\SourceBoost\boostc_pic18.exe"
 
-Release\ADC.obj: ADC.c ADC.h Shared_Timer.h Firmware.Release.__f
+Release\ADC.obj: ADC.c ADC.h Led.h Motor.h Shared_Timer.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
 Release\Distance_Sensor.obj: Distance_Sensor.c Distance_Sensor.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
-Release\Interrupt.obj: Interrupt.c ADC.h Distance_Sensor.h Motor.h Shared_Timer.h "UART.h" Firmware.Release.__f
+Release\Interrupt.obj: Interrupt.c ADC.h Distance_Sensor.h Motor.h Shared_Timer.h UART.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
 Release\Main.obj: Main.c ADC.h Artificial_Intelligence.h Distance_Sensor.h Led.h Motor.h "Shared_Timer.h" UART.h Firmware.Release.__f

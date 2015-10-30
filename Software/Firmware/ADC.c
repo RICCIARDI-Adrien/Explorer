@@ -4,13 +4,15 @@
  */
 #include <system.h>
 #include "ADC.h"
+#include "Led.h"
+#include "Motor.h"
 #include "Shared_Timer.h"
 
 //--------------------------------------------------------------------------------------------------
 // Private variables
 //--------------------------------------------------------------------------------------------------
 /** The last sampled battery voltage. */
-static volatile unsigned short ADC_Last_Sampled_Voltage;
+static volatile unsigned short ADC_Last_Sampled_Voltage = 0;
 
 //--------------------------------------------------------------------------------------------------
 // Public functions
@@ -37,7 +39,22 @@ void ADCScheduleBatteryVoltageSampling(void)
 	// Store the last sampled value
 	ADC_Last_Sampled_Voltage = ((adresh & 0x03) << 8) | adresl;
 	
-	// TODO : weak battery protection code
+	// Put the robot in protection mode if the battery is too weak
+	if (ADC_Last_Sampled_Voltage < ADC_WEAK_BATTERY_VOLTAGE)
+	{
+		// Stop the motors
+		MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
+		MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
+		
+		// Make the led blinks in red
+		while (1)
+		{
+			LedOnRed();
+			delay_ms(250);
+			LedOff();
+			delay_ms(250);
+		}
+	}
 	
 	// Start a new conversion
 	adcon0.GO = 1;
