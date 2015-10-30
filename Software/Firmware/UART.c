@@ -5,7 +5,6 @@
 #include <system.h>
 #include "ADC.h"
 #include "Distance_Sensor.h"
-#include "Flash.h"
 #include "UART.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -22,10 +21,7 @@
 /** The protocol magic number. */
 #define UART_PROTOCOL_MAGIC_NUMBER 0xA5
 /** How many bytes are expected as answer. */
-#define UART_PROTOCOL_COMMAND_ANSWER_SIZE 2
-
-/** The update flag location. */
-#define UART_UPDATE_FLAG_ADDRESS 0xFFC0 //The PIC18F26K22 flash last block
+#define UART_PROTOCOL_COMMAND_ANSWER_MAXIMUM_SIZE 2
 
 //--------------------------------------------------------------------------------------------------
 // Private types
@@ -34,36 +30,28 @@
 typedef enum
 {
 	UART_COMMAND_GET_BATTERY_VOLTAGE,
-	UART_COMMAND_GET_DISTANCE_SENSOR_VALUE,
-	UART_COMMAND_START_FIRMWARE_UPDATE,
-	UART_COMMAND_GET_RUNNING_MODE
+	UART_COMMAND_GET_DISTANCE_SENSOR_VALUE
 } TUARTCommand;
+
+//--------------------------------------------------------------------------------------------------
+// Private variables
+//--------------------------------------------------------------------------------------------------
+/** The data to transmit. */
+static unsigned char UART_Transmission_Buffer[UART_PROTOCOL_COMMAND_ANSWER_MAXIMUM_SIZE];
+/** How many bytes to send. */
+static unsigned char UART_Remaining_Bytes_To_Send = 0;
 
 //--------------------------------------------------------------------------------------------------
 // Private functions
 //--------------------------------------------------------------------------------------------------
-/** Start transmitting a single byte.
- * @param Byte The byte to send.
+/** Start transmitting data.
+ * @param Bytes_To_Send_Count How many bytes to send.
+ * @warning There is no check on the amount of bytes to send to save some cycles.
  */
-inline void UARTStartOneByteTransmission(unsigned char Byte)
+inline void UARTStartTransmission(unsigned char Bytes_To_Send_Count)
 {
-	// Disable the transmission interrupt as only one byte will be sent
-	UART_DISABLE_TRANSMISSION_INTERRUPT();
-	
-	// Start transmission
-	txreg2 = Byte;
-}
-
-/** Start transmitting two bytes.
- * @param First_Byte The first byte to send.
- */
-inline void UARTStartTwoBytesTransmission(unsigned char First_Byte)
-{
-	// Enable the transmission interrupt to send the second byte when the first one has been sent
-	UART_ENABLE_TRANSMISSION_INTERRUPT();
-	
-	// Start transmission
-	txreg2 = First_Byte;
+	UART_Remaining_Bytes_To_Send = Bytes_To_Send_Count;
+	UART_ENABLE_TRANSMISSION_INTERRUPT(); // This will immediately vector to the TX interrupt
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -86,12 +74,12 @@ void UARTInitialize(void)
 	
 	// Enable the UART interrupts
 	ipr3 &= ~0x30; // Set both interrupts as low priority
-	pie3 |= 0x30; // Enable reception and transmission interrupts
+	pie3.RC2IE = 1; // Enable only the reception interrupt (the transmission interrupt is enabled only when transmitting, moreover it would immediately trigger an interrupt if enabled as told in datasheet §16.1.1.7)
 }
 
 void UARTInterruptHandler(void)
 {
-	static unsigned char Is_Magic_Number_Received = 0, Command_Answer[UART_PROTOCOL_COMMAND_ANSWER_SIZE];
+	static unsigned char Is_Magic_Number_Received = 0;
 	unsigned char Byte;
 	unsigned short Word;
 	
@@ -100,7 +88,13 @@ void UARTInterruptHandler(void)
 	{
 		Byte = rcreg2;
 		
-		// TODO handle overflow
+		// Handle an overflow error
+		if (rcsta.OERR)
+		{
+			rcsta.CREN = 0; // Disable the reception to clear the error bit
+			rcsta.CREN = 1; // Re-enable it
+			return;
+		}
 		
 		// Wait for the magic number
 		if (!Is_Magic_Number_Received && (Byte == UART_PROTOCOL_MAGIC_NUMBER)) Is_Magic_Number_Received = 1;
@@ -111,27 +105,16 @@ void UARTInterruptHandler(void)
 			{
 				case UART_COMMAND_GET_BATTERY_VOLTAGE:
 					Word = ADCGetLastSampledBatteryVoltage();
-					Command_Answer[0] = Word >> 8;
-					Command_Answer[1] = (unsigned char) Word;
-					UARTStartTwoBytesTransmission(Command_Answer[0]);
+					UART_Transmission_Buffer[0] = Word >> 8;
+					UART_Transmission_Buffer[1] = (unsigned char) Word;
+					UARTStartTransmission(2);
 					break;
 					
 				case UART_COMMAND_GET_DISTANCE_SENSOR_VALUE:
 					Word = DistanceSensorGetLastSampledDistance();
-					Command_Answer[0] = Word >> 8;
-					Command_Answer[1] = (unsigned char) Word;
-					UARTStartTwoBytesTransmission(Command_Answer[0]);
-					break;
-				
-				case UART_COMMAND_START_FIRMWARE_UPDATE:
-					// Set the update flag to 0xFF
-					FlashEraseBlock(UART_UPDATE_FLAG_ADDRESS);
-					// Reboot the microcontroller
-					asm reset;
-					while (1); // Wait for the reset to happen
-					
-				case UART_COMMAND_GET_RUNNING_MODE:
-					UARTStartOneByteTransmission(1);
+					UART_Transmission_Buffer[0] = Word >> 8;
+					UART_Transmission_Buffer[1] = (unsigned char) Word;
+					UARTStartTransmission(2);
 					break;
 					
 				// Unknown command, do nothing
@@ -146,10 +129,14 @@ void UARTInterruptHandler(void)
 	// A byte has been sent
 	if (pie3.TX2IE && pir3.TX2IF)
 	{
-		// Disable the transmission interrupt as it is the last byte to send
-		UART_DISABLE_TRANSMISSION_INTERRUPT();
-	
-		// Send the command answer second byte
-		txreg2 = Command_Answer[1];
+		// Send the next byte
+		if (UART_Remaining_Bytes_To_Send > 0)
+		{
+			txreg2 = UART_Transmission_Buffer[UART_PROTOCOL_COMMAND_ANSWER_MAXIMUM_SIZE - UART_Remaining_Bytes_To_Send];
+			UART_Remaining_Bytes_To_Send--;
+			
+			// Disable the transmission interrupt if there is no more byte to send
+			if (UART_Remaining_Bytes_To_Send == 0) UART_DISABLE_TRANSMISSION_INTERRUPT();
+		}
 	}
 }
