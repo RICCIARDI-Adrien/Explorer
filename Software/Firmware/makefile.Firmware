@@ -14,7 +14,7 @@ Release\Distance_Sensor.obj: Distance_Sensor.c Distance_Sensor.h Firmware.Releas
 Release\Interrupt.obj: Interrupt.c ADC.h Distance_Sensor.h Motor.h Shared_Timer.h "UART.h" Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
-Release\Main.obj: Main.c ADC.h Distance_Sensor.h Led.h Motor.h "Shared_Timer.h" UART.h Firmware.Release.__f
+Release\Main.obj: Main.c ADC.h Artificial_Intelligence.h Distance_Sensor.h Led.h Motor.h "Shared_Timer.h" UART.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
 Release\Motor.obj: Motor.c Motor.h Firmware.Release.__f
@@ -26,9 +26,12 @@ Release\Shared_Timer.obj: Shared_Timer.c ADC.h Distance_Sensor.h Shared_Timer.h 
 Release\UART.obj: UART.c ADC.h Distance_Sensor.h UART.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
+Release\Artificial_Intelligence.obj: Artificial_Intelligence.c Artificial_Intelligence.h Distance_Sensor.h Led.h Motor.h Firmware.Release.__f
+	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
+
 LD = "C:\Program Files\SourceBoost\boostlink_picmicro.exe"
 
-Release\Firmware.hex: Release\ADC.obj Release\Distance_Sensor.obj Release\Interrupt.obj Release\Main.obj Release\Motor.obj Release\Shared_Timer.obj Release\UART.obj 
+Release\Firmware.hex: Release\ADC.obj Release\Distance_Sensor.obj Release\Interrupt.obj Release\Main.obj Release\Motor.obj Release\Shared_Timer.obj Release\UART.obj Release\Artificial_Intelligence.obj 
 	$(LD)  -idx 2  /ld "C:\Program Files\SourceBoost\lib\large" libc.pic18.lib $+ /t PIC18F26K22 -rb 0x300  /d "Release" /p Firmware
 
 all: Release Release\Firmware.hex
@@ -41,6 +44,7 @@ clean:
 	@if exist Release\Motor.obj del Release\Motor.obj
 	@if exist Release\Shared_Timer.obj del Release\Shared_Timer.obj
 	@if exist Release\UART.obj del Release\UART.obj
+	@if exist Release\Artificial_Intelligence.obj del Release\Artificial_Intelligence.obj
 	@if exist Release\Firmware.hex del Release\Firmware.hex
 	@if exist Release\Firmware.asm del Release\Firmware.asm
 	@if exist Release\Firmware.lst del Release\Firmware.lst

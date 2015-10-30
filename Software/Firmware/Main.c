@@ -4,6 +4,7 @@
  */
 #include <system.h>
 #include "ADC.h"
+#include "Artificial_Intelligence.h"
 #include "Distance_Sensor.h"
 #include "Led.h"
 #include "Motor.h"
@@ -54,9 +55,6 @@ void main(void)
 	
 	while (1)
 	{
-		LedOnGreen();
-		delay_ms(250);
-		LedOnRed();
-		delay_ms(250);
+		ArtificialIntelligenceAvoidObjects();
 	}
 }
