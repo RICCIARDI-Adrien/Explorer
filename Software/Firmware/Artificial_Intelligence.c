@@ -58,17 +58,41 @@ void ArtificialIntelligenceAvoidObjects(void)
 	{
 		Distance = ArtificialIntelligenceSampleDistance();
 		
-		// Turn 90° right if an obstacle was detected
-		if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(40))
+		// Go backward if the obstacle is too close
+		if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(15))
 		{
 			LedOnRed();
+			
+			// Stop motors
+			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
 			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
+			delay_s(1);	// Wait 1 second for the motors inductive current to dissipate (or it will generate a short circuit)
+			
+			// Go straight backward for some time
+			MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
+			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
+			delay_s(3);
+			
+			// Quickly turn left in backward mode
+			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
+			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
+			delay_s(1);
+		}
+		// Turn 90° right if an obstacle was detected
+		else if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(40))
+		{
+			LedOnRed();
+			
+			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
+			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
 			delay_s(1);
 		}
 		// Go straight if nothing at sight
 		else
 		{
 			LedOnGreen();
+			
+			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
 			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
 		}
 	}
