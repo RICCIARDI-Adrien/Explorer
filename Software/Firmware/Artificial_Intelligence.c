@@ -19,13 +19,9 @@ inline unsigned short ArtificialIntelligenceSampleDistance(void)
 	unsigned long Distance = 0;
 	unsigned char i;
 	
-	// Get 4 samples
-	for (i = 0; i < 4; i++)
-	{
-		Distance += DistanceSensorGetLastSampledDistance();
-		delay_ms(100);
-	}
-	
+	// Get several samples
+	for (i = 0; i < 4; i++) Distance += DistanceSensorGetDistance();
+		
 	// Compute the average
 	Distance >>= 2; // Fast division per 4
 	

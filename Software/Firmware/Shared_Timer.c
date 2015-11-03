@@ -4,7 +4,6 @@
  */
 #include <system.h>
 #include "ADC.h"
-#include "Distance_Sensor.h"
 #include "Shared_Timer.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -24,7 +23,7 @@ void SharedTimerInitialize(void)
 
 void SharedTimerInterruptHandler(void)
 {
-	static unsigned char Frequency_Divider_1Hz = 0, Frequency_Divider_10Hz = 0;
+	static unsigned char Frequency_Divider_1Hz = 0;
 	
 	// Schedule a battery voltage measure every second
 	Frequency_Divider_1Hz++;
@@ -32,14 +31,6 @@ void SharedTimerInterruptHandler(void)
 	{
 		ADCScheduleBatteryVoltageSampling();
 		Frequency_Divider_1Hz = 0;
-	}
-	
-	// Schedule a distance measure every 100ms
-	Frequency_Divider_10Hz++;
-	if (Frequency_Divider_10Hz >= 3)
-	{
-		DistanceSensorScheduleDistanceSampling();
-		Frequency_Divider_10Hz = 0;
 	}
 	
 	// Clear the interrupt flag

@@ -19,12 +19,13 @@
 /** Initialize the timer required to measure the time elapsed between the ultrasonic burst emission and reception. */
 void DistanceSensorInitialize(void);
 
-/** Start a distance measure. */
-void DistanceSensorScheduleDistanceSampling(void);
-
 /** Return the last sampled distance value.
- * @return The distance to the nearest object in centimeters. */
+ * @return The distance to the nearest object in sensor units (must divide by 58 to convert to cm). */
 unsigned short DistanceSensorGetLastSampledDistance(void);
+
+/** Sample the distance with the nearest object. The maximum sampling time is 38ms.
+ * @return The distance to the nearest object in sensor units (must divide by 58 to convert to cm). */
+unsigned short DistanceSensorGetDistance(void);
 
 /** Called on RB1 pin state change. */
 void DistanceSensorInterruptHandler(void);

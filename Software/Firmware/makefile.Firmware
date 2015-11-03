@@ -23,7 +23,7 @@ Release\Main.obj: Main.c ADC.h Artificial_Intelligence.h Distance_Sensor.h Led.h
 Release\Motor.obj: Motor.c Motor.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
-Release\Shared_Timer.obj: Shared_Timer.c ADC.h Distance_Sensor.h Shared_Timer.h Firmware.Release.__f
+Release\Shared_Timer.obj: Shared_Timer.c ADC.h Shared_Timer.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
 Release\UART.obj: UART.c ADC.h Distance_Sensor.h UART.h Firmware.Release.__f
