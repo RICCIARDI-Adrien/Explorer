@@ -8,6 +8,7 @@
 #include "Distance_Sensor.h"
 #include "Led.h"
 #include "Motor.h"
+#include "Random.h"
 #include "Shared_Timer.h"
 #include "UART.h"
 
@@ -41,6 +42,7 @@ void main(void)
 	MotorInitialize();
 	SharedTimerInitialize();
 	LedInitialize();
+	RandomInitialize();
 	
 	// Enable the interrupts
 	rcon.IPEN = 1; // Enable interrupt priority
@@ -55,6 +57,6 @@ void main(void)
 	
 	while (1)
 	{
-		ArtificialIntelligenceAvoidObjects();
+		ArtificialIntelligenceAvoidObjectsRandomTurnDirection();
 	}
 }

@@ -9,6 +9,9 @@
 // Functions
 //--------------------------------------------------------------------------------------------------
 /** The robot goes straight until it finds an obstacle, then turn right and continue. */
-void ArtificialIntelligenceAvoidObjects(void);
+void ArtificialIntelligenceAvoidObjectsDeterministTurnDirection(void);
+
+/** The robot goes straight until it finds an obstacle, then choose a random direction and turn this way. */
+void ArtificialIntelligenceAvoidObjectsRandomTurnDirection(void);
 
 #endif
