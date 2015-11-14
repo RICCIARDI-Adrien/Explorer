@@ -7,6 +7,12 @@
 #include "Shared_Timer.h"
 
 //--------------------------------------------------------------------------------------------------
+// Private variables
+//--------------------------------------------------------------------------------------------------
+/** The time out counter. */
+static unsigned int Shared_Timer_Time_Out_Counter = 0;
+
+//--------------------------------------------------------------------------------------------------
 // Public functions
 //--------------------------------------------------------------------------------------------------
 void SharedTimerInitialize(void)
@@ -21,9 +27,30 @@ void SharedTimerInitialize(void)
 	pie2.TMR3IE = 1;
 }
 
+void SharedTimerScheduleTimeOut(unsigned int Time)
+{
+	// Atomically set the shared variable
+	SHARED_TIMER_DISABLE_INTERRUPT();
+	Shared_Timer_Time_Out_Counter = Time;
+	SHARED_TIMER_ENABLE_INTERRUPT();
+}
+
+unsigned char SharedTimerIsTimeOutOccurred(void)
+{
+	unsigned char Is_Time_Out_Occurred;
+	
+	// Atomically access to the shared variable
+	SHARED_TIMER_DISABLE_INTERRUPT();
+	if (Shared_Timer_Time_Out_Counter == 0) Is_Time_Out_Occurred = 1;
+	else Is_Time_Out_Occurred = 0;
+	SHARED_TIMER_ENABLE_INTERRUPT();
+	
+	return Is_Time_Out_Occurred;
+}
+
 void SharedTimerInterruptHandler(void)
 {
-	static unsigned char Frequency_Divider_1Hz = 0;
+	static unsigned char Frequency_Divider_1Hz = 0, Frequency_Divider_10_Hz = 0;
 	
 	// Schedule a battery voltage measure every second
 	Frequency_Divider_1Hz++;
@@ -31,6 +58,17 @@ void SharedTimerInterruptHandler(void)
 	{
 		ADCScheduleBatteryVoltageSampling();
 		Frequency_Divider_1Hz = 0;
+	}
+	
+	// Decrement the time out timer every 100ms
+	if (Shared_Timer_Time_Out_Counter > 0)
+	{
+		Frequency_Divider_10_Hz++;
+		if (Frequency_Divider_10_Hz >= 3)
+		{
+			Shared_Timer_Time_Out_Counter--;
+			Frequency_Divider_10_Hz = 0;
+		}
 	}
 	
 	// Clear the interrupt flag
