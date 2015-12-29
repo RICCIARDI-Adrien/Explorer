@@ -159,10 +159,10 @@ void ArtificialIntelligenceAvoidObjectsRandomTurnDirection(void)
 			LedOnRed();
 			
 			// Choose a new random direction if the previous one lasted long enough. By keeping the same direction for some time, the robot avoids turning left then right then left and so on when it is blocked until the random choice keeps a direction long enough
-			if (SharedTimerIsTimeOutOccurred())
+			if (SharedTimerIsTimerStopped(0))
 			{
 				Turn_Direction = ArtificialIntelligenceRandomBinaryChoice();
-				SharedTimerScheduleTimeOut(40); // 4s should be enough for most blocking situations
+				SharedTimerStartTimer(0, 40); // 4s should be enough for most blocking situations
 			}
 			
 			if (Turn_Direction == 0)

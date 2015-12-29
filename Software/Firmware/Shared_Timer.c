@@ -9,8 +9,8 @@
 //--------------------------------------------------------------------------------------------------
 // Private variables
 //--------------------------------------------------------------------------------------------------
-/** The time out counter. */
-static unsigned int Shared_Timer_Time_Out_Counter = 0;
+/** The software timers counters. */
+static unsigned int Shared_Timer_Timers_Counters[SHARED_TIMER_TIMERS_COUNT] = {0};
 
 //--------------------------------------------------------------------------------------------------
 // Public functions
@@ -27,21 +27,27 @@ void SharedTimerInitialize(void)
 	pie2.TMR3IE = 1;
 }
 
-void SharedTimerScheduleTimeOut(unsigned int Time)
+void SharedTimerStartTimer(unsigned char Index, unsigned int Time)
 {
+	// Nothing to do if the provided index is invalid
+	if (Index >= SHARED_TIMER_TIMERS_COUNT) return;
+
 	// Atomically set the shared variable
 	SHARED_TIMER_DISABLE_INTERRUPT();
-	Shared_Timer_Time_Out_Counter = Time;
+	Shared_Timer_Timers_Counters[Index] = Time;
 	SHARED_TIMER_ENABLE_INTERRUPT();
 }
 
-unsigned char SharedTimerIsTimeOutOccurred(void)
+unsigned char SharedTimerIsTimerStopped(unsigned char Index)
 {
 	unsigned char Is_Time_Out_Occurred;
 	
+	// Return false if the provided index is invalid
+	if (Index >= SHARED_TIMER_TIMERS_COUNT) return 0;
+	
 	// Atomically access to the shared variable
 	SHARED_TIMER_DISABLE_INTERRUPT();
-	if (Shared_Timer_Time_Out_Counter == 0) Is_Time_Out_Occurred = 1;
+	if (Shared_Timer_Timers_Counters[Index] == 0) Is_Time_Out_Occurred = 1;
 	else Is_Time_Out_Occurred = 0;
 	SHARED_TIMER_ENABLE_INTERRUPT();
 	
@@ -51,6 +57,7 @@ unsigned char SharedTimerIsTimeOutOccurred(void)
 void SharedTimerInterruptHandler(void)
 {
 	static unsigned char Frequency_Divider_1Hz = 0, Frequency_Divider_10_Hz = 0;
+	unsigned char i;
 	
 	// Schedule a battery voltage measure every second
 	Frequency_Divider_1Hz++;
@@ -60,15 +67,15 @@ void SharedTimerInterruptHandler(void)
 		Frequency_Divider_1Hz = 0;
 	}
 	
-	// Decrement the time out timer every 100ms
-	if (Shared_Timer_Time_Out_Counter > 0)
+	// Decrement the timers every 100ms
+	Frequency_Divider_10_Hz++;
+	if (Frequency_Divider_10_Hz >= 3)
 	{
-		Frequency_Divider_10_Hz++;
-		if (Frequency_Divider_10_Hz >= 3)
+		for (i = 0; i < SHARED_TIMER_TIMERS_COUNT; i++)
 		{
-			Shared_Timer_Time_Out_Counter--;
-			Frequency_Divider_10_Hz = 0;
+			if (Shared_Timer_Timers_Counters[i] > 0) Shared_Timer_Timers_Counters[i]--;
 		}
+		Frequency_Divider_10_Hz = 0;
 	}
 	
 	// Clear the interrupt flag
