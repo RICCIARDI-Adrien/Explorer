@@ -57,6 +57,6 @@ void main(void)
 	
 	while (1)
 	{
-		ArtificialIntelligenceAvoidObjectsRandomTurnDirection();
+		ArtificialIntelligenceAvoidObjectsGainingTrust();
 	}
 }
