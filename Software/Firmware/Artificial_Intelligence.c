@@ -15,6 +15,8 @@
 //--------------------------------------------------------------------------------------------------
 /** The obstacle detection distance used when the robot is scared (cm). */
 #define ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_DEFAULT_OBSTACLE_DETECTION_DISTANCE 40
+/** How many time (in ms * 10) before the robot comes nearer to an object (i.e. gain trust). */
+#define ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_TIMER_VALUE 50
 
 //--------------------------------------------------------------------------------------------------
 // Private functions
@@ -204,9 +206,6 @@ void ArtificialIntelligenceAvoidObjectsGainingTrust(void)
 	static unsigned char Turn_Direction;
 	static unsigned short Obstacle_Detection_Distance = DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_DEFAULT_OBSTACLE_DETECTION_DISTANCE);
 	
-	// The robot starts being fearful
-	LedOnRed();
-	
 	MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
 	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
 	
@@ -250,16 +249,18 @@ void ArtificialIntelligenceAvoidObjectsGainingTrust(void)
 			
 			// Reset the object detection distance to farthest distance (the robot went too far and was scared, so it becomes fearful again)
 			Obstacle_Detection_Distance = DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_DEFAULT_OBSTACLE_DETECTION_DISTANCE);
-			SharedTimerStartTimer(1, 50); // Reset the timer too (do that after the delay to avoid loosing 1 second due to the delay)
+			SharedTimerStartTimer(1, ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_TIMER_VALUE); // Reset the timer too (do that after the delay to avoid loosing 1 second due to the delay)
 		}
-		// Turn 90° if an obstacle was detected
+		// Turn from 45° (turning time is 500ms) to 180° (turning time is 2s) if an obstacle was detected
 		else if (Distance < Obstacle_Detection_Distance)
 		{
+			LedOnRed();
+		
 			// Choose a new random direction if the previous one lasted long enough. By keeping the same direction for some time, the robot avoids turning left then right then left and so on when it is blocked until the random choice keeps a direction long enough
 			if (SharedTimerIsTimerStopped(0))
 			{
 				Turn_Direction = ArtificialIntelligenceRandomBinaryChoice();
-				SharedTimerStartTimer(0, 40); // 4s should be enough for most blocking situations
+				SharedTimerStartTimer(0, 60); // 6s should be enough for most blocking situations, even if the robot does not turn 90° every time
 			}
 			
 			if (Turn_Direction == 0)
@@ -274,11 +275,39 @@ void ArtificialIntelligenceAvoidObjectsGainingTrust(void)
 				MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
 				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
 			}
-			delay_s(1);
+			
+			// Choose the turning time, which determine the turning angle, from 500ms (45°) to 2s (180°)
+			switch (RandomGetNumber() % 4)
+			{
+				// 45°
+				case 0:
+					delay_ms(250);
+					delay_ms(250);
+					break;
+				
+				// 90°
+				case 1:
+					delay_s(1);
+					break;
+				
+				// 135°
+				case 2:
+					delay_s(1);
+					delay_ms(250);
+					delay_ms(250);
+					break;
+				
+				// 180°	
+				default:
+					delay_s(2);
+					break;
+			}
 		}
 		// Go straight if nothing at sight
 		else
 		{
+			LedOnGreen();
+		
 			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
 			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
 		}
@@ -286,13 +315,11 @@ void ArtificialIntelligenceAvoidObjectsGainingTrust(void)
 		// Decrement the object detection distance if the robot did not went too far to an object for some time (it's like the robot is gaining trust)
 		if (SharedTimerIsTimerStopped(1))
 		{
-			LedOnGreen();
-		
 			// Make the robot come closer to the obstacles
 			if (DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(Obstacle_Detection_Distance) > DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(20)) Obstacle_Detection_Distance -= DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(2);
 			
 			// Restart the timer
-			SharedTimerStartTimer(1, 50);
+			SharedTimerStartTimer(1, ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_TIMER_VALUE);
 		}	
 	}
 }
