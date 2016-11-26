@@ -8,16 +8,14 @@
 #include <unistd.h>
 #include "Configuration.h"
 #include "Protocol.h"
-#include "UART.h"
 
 //-------------------------------------------------------------------------------------------------
 // Entry point
 //-------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-	int Return_Value = EXIT_SUCCESS;
 	char *String_Serial_Port_File, *String_Command, *String_Hex_File;
-	
+		
 	// Check parameters
 	if (argc < 3)
 	{
@@ -36,7 +34,7 @@ int main(int argc, char *argv[])
 	String_Command = argv[2];
 	
 	// Try to open the serial port
-	if (UARTOpen(String_Serial_Port_File, 115200) != 0)
+	if (ProtocolInitialize(String_Serial_Port_File) != 0)
 	{
 		printf("Error : failed to open the serial port '%s'.\n", String_Serial_Port_File);
 		return EXIT_FAILURE;
@@ -51,25 +49,18 @@ int main(int argc, char *argv[])
 		if (argc < 4)
 		{
 			printf("Error : you must provide an Hex file path with the -u command.\n");
-			Return_Value = EXIT_FAILURE;
-			goto Exit;
+			return EXIT_FAILURE;
 		}
 		String_Hex_File = argv[3];
 		
 		// Try to update the firmware
-		if (ProtocolUpdateFirmware(String_Hex_File) != 0)
-		{
-			Return_Value = EXIT_FAILURE;
-			goto Exit;
-		}
+		if (ProtocolUpdateFirmware(String_Hex_File) != 0) return EXIT_FAILURE;
 	}
 	else
 	{
 		printf("Error : unknown command.\n");
-		Return_Value = EXIT_FAILURE;
+		return EXIT_FAILURE;
 	}
 
-Exit:
-	UARTClose();
-	return Return_Value;
+	return EXIT_SUCCESS;
 }

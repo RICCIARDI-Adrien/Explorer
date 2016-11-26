@@ -2,11 +2,12 @@
  * @see Protocol.h for description.
  * @author Adrien RICCIARDI
  */
+#include <Serial_Port.h>
+#include <stdlib.h> // Needed by atexit()
 #include <unistd.h> // Needed by usleep()
 #include "Configuration.h"
 #include "Hex_Parser.h"
 #include "Protocol.h"
-#include "UART.h"
 
 //-------------------------------------------------------------------------------------------------
 // Private constants
@@ -30,21 +31,48 @@ typedef enum
 } TProtocolCommand;
 
 //-------------------------------------------------------------------------------------------------
+// Private variables
+//-------------------------------------------------------------------------------------------------
+/** The opened serial port identifier. */
+static TSerialPortID Protocol_Serial_Port_ID;
+
+//-------------------------------------------------------------------------------------------------
+// Private functions
+//-------------------------------------------------------------------------------------------------
+/** Close the UART on program exit. */
+static void ProtocolExitCloseSerialPort(void)
+{
+	SerialPortClose(Protocol_Serial_Port_ID);
+}
+
+//-------------------------------------------------------------------------------------------------
 // Public functions
 //-------------------------------------------------------------------------------------------------
+int ProtocolInitialize(char *String_Serial_Port_File)
+{
+	// Try to open the serial port
+	if (SerialPortOpen(String_Serial_Port_File, 115200, &Protocol_Serial_Port_ID) == 0)
+	{
+		atexit(ProtocolExitCloseSerialPort);
+		return 0;
+	}
+
+	return 1;
+}
+
 float ProtocolGetBatteryVoltage(void)
 {
 	int Raw_Voltage;
 	
 	// Send the command
 	Debug("[%s] Sending magic number...\n", __func__);
-	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
+	SerialPortWriteByte(Protocol_Serial_Port_ID, PROTOCOL_MAGIC_NUMBER);
 	Debug("[%s] Sending command...\n", __func__);
-	UARTWriteByte(PROTOCOL_COMMAND_GET_BATTERY_VOLTAGE);
+	SerialPortWriteByte(Protocol_Serial_Port_ID, PROTOCOL_COMMAND_GET_BATTERY_VOLTAGE);
 	
 	// Receive the raw voltage
 	Debug("[%s] Waiting for answer...\n", __func__);
-	Raw_Voltage = (UARTReadByte() << 8) | UARTReadByte();
+	Raw_Voltage = (SerialPortReadByte(Protocol_Serial_Port_ID) << 8) | SerialPortReadByte(Protocol_Serial_Port_ID);
 	Debug("[%s] Raw voltage : %d.\n", __func__, Raw_Voltage);
 	
 	// Convert the voltage to volts
@@ -57,13 +85,13 @@ int ProtocolGetSonarDistance(void)
 	
 	// Send the command
 	Debug("[%s] Sending magic number...\n", __func__);
-	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
+	SerialPortWriteByte(Protocol_Serial_Port_ID, PROTOCOL_MAGIC_NUMBER);
 	Debug("[%s] Sending command...\n", __func__);
-	UARTWriteByte(PROTOCOL_COMMAND_GET_DISTANCE_SENSOR_VALUE);
+	SerialPortWriteByte(Protocol_Serial_Port_ID, PROTOCOL_COMMAND_GET_DISTANCE_SENSOR_VALUE);
 	
 	// Receive the raw distance
 	Debug("[%s] Waiting for answer...\n", __func__);
-	Raw_Distance = (UARTReadByte() << 8) | UARTReadByte();
+	Raw_Distance = (SerialPortReadByte(Protocol_Serial_Port_ID) << 8) | SerialPortReadByte(Protocol_Serial_Port_ID);
 	Debug("[%s] Measured time : %d ms.\n", __func__, Raw_Distance);
 	
 	// Convert it to centimeters
@@ -93,17 +121,17 @@ int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 	printf("Waiting for the bootloader code...\n");
 	do
 	{
-		Byte = UARTReadByte();
+		Byte = SerialPortReadByte(Protocol_Serial_Port_ID);
 		Debug("[%s] Received byte : 0x%02X.\n", __func__, Byte);
 	} while (Byte != PROTOCOL_MAGIC_NUMBER);
 	
 	// Send the same code to the bootloader to enter programming mode
-	UARTWriteByte(PROTOCOL_MAGIC_NUMBER);
+	SerialPortWriteByte(Protocol_Serial_Port_ID, PROTOCOL_MAGIC_NUMBER);
 	
 	// Send the firmware size
 	Debug("[%s] Sending the firmware size...\n", __func__);
-	UARTWriteByte(Firmware_Size >> 8);
-	UARTWriteByte((unsigned char) Firmware_Size);
+	SerialPortWriteByte(Protocol_Serial_Port_ID, Firmware_Size >> 8);
+	SerialPortWriteByte(Protocol_Serial_Port_ID, (unsigned char) Firmware_Size);
 	
 	// Send the instructions
 	while (Firmware_Size > 0)
@@ -114,12 +142,12 @@ int ProtocolUpdateFirmware(char *String_Firmware_Hex_File)
 		else Bytes_To_Send_Count = Firmware_Size;
 		
 		// Send a block
-		UARTWriteBuffer(Pointer_Memory, Bytes_To_Send_Count);
+		SerialPortWriteBuffer(Protocol_Serial_Port_ID, Pointer_Memory, Bytes_To_Send_Count);
 		Pointer_Memory += Bytes_To_Send_Count;
 		Firmware_Size -= Bytes_To_Send_Count;
 		
 		// Wait for the bootloader to acknowledge
-		Byte = UARTReadByte();
+		Byte = SerialPortReadByte(Protocol_Serial_Port_ID);
 		if (Byte != PROTOCOL_ACKNOWLEDGE)
 		{
 			printf("Error : the bootloader acknowledged value was 0x%02X instead of 0x%02X.\n", Byte, PROTOCOL_ACKNOWLEDGE);
