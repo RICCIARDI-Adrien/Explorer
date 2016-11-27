@@ -4,7 +4,7 @@ Active Compiler=BoostC
 Active Directory=F:\cygwin64\home\Adrien\Explorer\Software\Firmware\
 Active Config=Release
 ClockRate=64000000
-Last Ext=h
+Last Ext=c
 Last ExtIdx=1
 Last Dir=C:\Program Files\SourceBoost\include\
 Type=0
@@ -13,7 +13,7 @@ Model=1
 Profiling=0
 Snapshot=0
 [Files]
-Count=17
+Count=18
 File0=ADC.c
 File1=ADC.h
 File2=Artificial_Intelligence.c
@@ -31,6 +31,7 @@ File13=Shared_Timer.c
 File14=Shared_Timer.h
 File15=UART.c
 File16=UART.h
+File17=Artificial_Intelligence_Avoid_Objects.c
 [Bookmarks]
 Count=0
 [Breakpoints]

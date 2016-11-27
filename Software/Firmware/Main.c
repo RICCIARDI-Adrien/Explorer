@@ -57,6 +57,7 @@ void main(void)
 	
 	while (1)
 	{
-		ArtificialIntelligenceAvoidObjectsGainingTrust();
+		ArtificialIntelligenceAvoidObjects();
+		//ArtificialIntelligenceFollowObjects();
 	}
 }

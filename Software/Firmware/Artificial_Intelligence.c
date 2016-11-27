@@ -5,26 +5,13 @@
 #include <system.h>
 #include "Artificial_Intelligence.h"
 #include "Distance_Sensor.h"
-#include "Led.h"
 #include "Motor.h"
 #include "Random.h"
-#include "Shared_Timer.h"
 
 //--------------------------------------------------------------------------------------------------
-// Private constants
+// Public functions
 //--------------------------------------------------------------------------------------------------
-/** The obstacle detection distance used when the robot is scared (cm). */
-#define ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_DEFAULT_OBSTACLE_DETECTION_DISTANCE 40
-/** How many time (in ms * 10) before the robot comes nearer to an object (i.e. gain trust). */
-#define ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_TIMER_VALUE 50
-
-//--------------------------------------------------------------------------------------------------
-// Private functions
-//--------------------------------------------------------------------------------------------------
-/** Accumulate distance samples for 400ms and return the average.
- * @return The average distance.
- */
-inline unsigned short ArtificialIntelligenceSampleDistance(void)
+unsigned short ArtificialIntelligenceSampleDistance(void)
 {
 	unsigned long Distance = 0;
 	unsigned char i;
@@ -38,357 +25,51 @@ inline unsigned short ArtificialIntelligenceSampleDistance(void)
 	return (unsigned short) Distance;
 }
 
-/** Randomly returns 0 or 1.
- * @return 0 or 1.
- */
-inline unsigned char ArtificialIntelligenceRandomBinaryChoice(void)
+unsigned char ArtificialIntelligenceRandomBinaryChoice(void)
 {
-	if (RandomGetNumber() % 2) return 0;
+	if (RandomGetNumber() < 128) return 0; // Do not use modulo operator to be faster
 	return 1;
 }
 
-//--------------------------------------------------------------------------------------------------
-// Public functions
-//--------------------------------------------------------------------------------------------------
-#if 0
-void ArtificialIntelligenceSearchForGreatOutdoors(void)
+void ArtificialIntelligenceRandomAngleTurn(unsigned char Is_Turning_Left)
 {
-	unsigned short Distance;
-	
-	while (1)
+	if (Is_Turning_Left)
 	{
-		Distance = ArtificialIntelligenceSampleDistance();
-		
-		
+		// Turn left
+		MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
+		MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
 	}
-}
-#endif
-
-#if 0
-void ArtificialIntelligenceAvoidObjectsDeterministTurnDirection(void)
-{
-	unsigned short Distance;
-	
-	MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-	
-	while (1)
+	else
 	{
-		Distance = ArtificialIntelligenceSampleDistance();
-		
-		// Go backward if the obstacle is too close
-		if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(15))
-		{
-			LedOnRed();
-			
-			// Stop motors
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-			delay_ms(250); // Wait some time for the motors inductive current to dissipate (or it will generate a short circuit)
+		// Turn right
+		MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
+		MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
+	}
+	
+	// Choose the turning time, which determine the turning angle, from 500ms (45°) to 2s (180°)
+	switch (RandomGetNumber() % 4)
+	{
+		// 45°
+		case 0:
 			delay_ms(250);
-			
-			// Go straight backward for some time
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			delay_s(3);
-			
-			// Quickly turn left in backward mode
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			delay_s(1);
-		}
-		// Turn 90° right if an obstacle was detected
-		else if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(40))
-		{
-			LedOnRed();
-			
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			delay_s(1);
-		}
-		// Go straight if nothing at sight
-		else
-		{
-			LedOnGreen();
-			
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-		}
-	}
-}
-#endif
-
-#if 0
-void ArtificialIntelligenceAvoidObjectsRandomTurnDirection(void)
-{
-	unsigned short Distance;
-	static unsigned char Turn_Direction;
-	
-	MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-	
-	while (1)
-	{
-		Distance = ArtificialIntelligenceSampleDistance();
-		
-		// Go backward if the obstacle is too close
-		if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(15))
-		{
-			LedOnRed();
-			
-			// Stop motors
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-			delay_ms(250); // Wait some time for the motors inductive current to dissipate (or it will generate a short circuit)
 			delay_ms(250);
-			
-			// Go straight backward for some time
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			delay_s(3);
-			
-			// Quickly turn in a random direction in backward mode
-			if (ArtificialIntelligenceRandomBinaryChoice())
-			{
-				// Turn left
-				MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			}
-			else
-			{
-				// Turn right
-				MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-			}
-			delay_s(1);
-		}
-		// Turn 90° if an obstacle was detected
-		else if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(40))
-		{
-			LedOnRed();
-			
-			// Choose a new random direction if the previous one lasted long enough. By keeping the same direction for some time, the robot avoids turning left then right then left and so on when it is blocked until the random choice keeps a direction long enough
-			if (SharedTimerIsTimerStopped(0))
-			{
-				Turn_Direction = ArtificialIntelligenceRandomBinaryChoice();
-				SharedTimerStartTimer(0, 40); // 4s should be enough for most blocking situations
-			}
-			
-			if (Turn_Direction == 0)
-			{
-				// Turn right
-				MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			}
-			else
-			{
-				// Turn left
-				MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-			}
-			delay_s(1);
-		}
-		// Go straight if nothing at sight
-		else
-		{
-			LedOnGreen();
-			
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-		}
-	}
-}
-#endif
-
-void ArtificialIntelligenceAvoidObjectsGainingTrust(void)
-{
-	unsigned short Distance;
-	static unsigned char Turn_Direction;
-	static unsigned short Obstacle_Detection_Distance = DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_DEFAULT_OBSTACLE_DETECTION_DISTANCE);
-	
-	MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-	
-	// Start the "trust" timer
-	SharedTimerStartTimer(1, 50);
-	
-	while (1)
-	{
-		Distance = ArtificialIntelligenceSampleDistance();
+			break;
 		
-		// Go backward if the obstacle is too close
-		if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(15))
-		{
-			LedOnRed();
-			
-			// Stop motors
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-			delay_ms(250); // Wait some time for the motors inductive current to dissipate (or it will generate a short circuit)
+		// 90°
+		case 1:
+			delay_s(1);
+			break;
+		
+		// 135°
+		case 2:
+			delay_s(1);
 			delay_ms(250);
-			
-			// Go straight backward for some time
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			delay_s(3);
-			
-			// Quickly turn in a random direction in backward mode
-			if (ArtificialIntelligenceRandomBinaryChoice())
-			{
-				// Turn left
-				MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			}
-			else
-			{
-				// Turn right
-				MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-			}
-			delay_s(1);
-			
-			// Reset the object detection distance to farthest distance (the robot went too far and was scared, so it becomes fearful again)
-			Obstacle_Detection_Distance = DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_DEFAULT_OBSTACLE_DETECTION_DISTANCE);
-			SharedTimerStartTimer(1, ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_TIMER_VALUE); // Reset the timer too (do that after the delay to avoid loosing 1 second due to the delay)
-		}
-		// Turn from 45° (turning time is 500ms) to 180° (turning time is 2s) if an obstacle was detected
-		else if (Distance < Obstacle_Detection_Distance)
-		{
-			LedOnRed();
-		
-			// Choose a new random direction if the previous one lasted long enough. By keeping the same direction for some time, the robot avoids turning left then right then left and so on when it is blocked until the random choice keeps a direction long enough
-			if (SharedTimerIsTimerStopped(0))
-			{
-				Turn_Direction = ArtificialIntelligenceRandomBinaryChoice();
-				SharedTimerStartTimer(0, 60); // 6s should be enough for most blocking situations, even if the robot does not turn 90° every time
-			}
-			
-			if (Turn_Direction == 0)
-			{
-				// Turn right
-				MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			}
-			else
-			{
-				// Turn left
-				MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-				MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-			}
-			
-			// Choose the turning time, which determine the turning angle, from 500ms (45°) to 2s (180°)
-			switch (RandomGetNumber() % 4)
-			{
-				// 45°
-				case 0:
-					delay_ms(250);
-					delay_ms(250);
-					break;
-				
-				// 90°
-				case 1:
-					delay_s(1);
-					break;
-				
-				// 135°
-				case 2:
-					delay_s(1);
-					delay_ms(250);
-					delay_ms(250);
-					break;
-				
-				// 180°	
-				default:
-					delay_s(2);
-					break;
-			}
-		}
-		// Go straight if nothing at sight
-		else
-		{
-			LedOnGreen();
-		
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-		}
-		
-		// Decrement the object detection distance if the robot did not went too far to an object for some time (it's like the robot is gaining trust)
-		if (SharedTimerIsTimerStopped(1))
-		{
-			// Make the robot come closer to the obstacles
-			if (DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(Obstacle_Detection_Distance) > DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(20)) Obstacle_Detection_Distance -= DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(2);
-			
-			// Restart the timer
-			SharedTimerStartTimer(1, ARTIFICIAL_INTELLIGENTE_AVOID_OBJECTS_GAINING_TRUST_TIMER_VALUE);
-		}	
-	}
-}
-
-#if 0
-void ArtificialIntelligenceFollowObjects(void)
-{
-	unsigned short Distance;
-	unsigned char Is_Target_Found = 0;
-	
-	LedOnRed();
-	MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-	
-	while (1)
-	{
-		Distance = ArtificialIntelligenceSampleDistance();
-		
-		// Go backward if the obstacle is too close
-		if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(15))
-		{
-			LedOnRed();
-			
-			// Stop motors
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-			delay_ms(250); // Wait some time for the motors inductive current to dissipate (or it will generate a short circuit)
 			delay_ms(250);
-			
-			// Go straight backward for some time
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
-			delay_s(3);
-		}
-		// Stop if the object is close enougth
-		else if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(20))
-		{
-			LedOnRed();
-			
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-		}
-		// Follow the object if it not too far
-		else if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(50))
-		{
-			LedOnGreen();
-			
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_FORWARD);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-			Is_Target_Found = 1;
-		}
-		// Stop if there is nothing at sight
-		else if (Distance >= DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(100))
-		{
-			LedOnRed();
-			
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
-			Is_Target_Found = 0;
-		}
-		// The target has been lost, try to find it by looking on sides
-		else if (Is_Target_Found)
-		{
-			// Go left some times
-			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
-			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
-			
-			
-		}
+			break;
+		
+		// 180°	
+		default:
+			delay_s(2);
+			break;
 	}
 }
-#endif
