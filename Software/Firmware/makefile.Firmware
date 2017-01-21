@@ -17,7 +17,7 @@ Release\Distance_Sensor.obj: Distance_Sensor.c Distance_Sensor.h Firmware.Releas
 Release\Interrupt.obj: Interrupt.c ADC.h Distance_Sensor.h Motor.h Shared_Timer.h UART.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
-Release\Main.obj: Main.c ADC.h Artificial_Intelligence.h Distance_Sensor.h "Led.h" Motor.h Random.h Shared_Timer.h "UART.h" Firmware.Release.__f
+Release\Main.obj: Main.c ADC.h Artificial_Intelligence.h Distance_Sensor.h Led.h Motor.h Random.h Shared_Timer.h "UART.h" Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
 Release\Motor.obj: Motor.c Motor.h Firmware.Release.__f
@@ -32,7 +32,7 @@ Release\Shared_Timer.obj: Shared_Timer.c ADC.h Shared_Timer.h Firmware.Release._
 Release\UART.obj: UART.c ADC.h Distance_Sensor.h UART.h Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
-Release\Artificial_Intelligence_Avoid_Objects.obj: Artificial_Intelligence_Avoid_Objects.c Artificial_Intelligence.h Distance_Sensor.h Led.h Motor.h "Shared_Timer.h" Firmware.Release.__f
+Release\Artificial_Intelligence_Avoid_Objects.obj: Artificial_Intelligence_Avoid_Objects.c Artificial_Intelligence.h Distance_Sensor.h Led.h "Motor.h" "Random.h" "Shared_Timer.h" Firmware.Release.__f
 	$(CC) $< -t PIC18F26K22  -idx 2 -obj Release -d _RELEASE
 
 LD = "C:\Program Files\SourceBoost\boostlink_picmicro.exe"

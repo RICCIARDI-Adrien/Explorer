@@ -1,5 +1,5 @@
 /** @file Artificial_Intelligence.h
- * Randomly between multiple behaviours.
+ * Provide utility functions used by all artificial intelligence behaviors and gather all behaviors.
  * @author Adrien RICCIARDI
  */
 #ifndef H_ARTIFICIAL_INTELLIGENCE_H
@@ -19,7 +19,7 @@ unsigned short ArtificialIntelligenceSampleDistance(void);
  */
 unsigned char ArtificialIntelligenceRandomBinaryChoice(void);
 
-/** Turn to the specified direction with a random angle (from 45° to 180°).
+/** Turn to the specified direction with a random angle (from 45 degrees to 180 degrees).
  * @param Is_Turning_Left Set to 1 to turn left or to 0 to turn right.
  */
 void ArtificialIntelligenceRandomAngleTurn(unsigned char Is_Turning_Left);
