@@ -2,7 +2,6 @@
  * @see Artificial_Intelligence.h for description.
  * @author Adrien RICCIARDI
  */
-#include <system.h>
 #include "Artificial_Intelligence.h"
 #include "Distance_Sensor.h"
 #include "Led.h"
