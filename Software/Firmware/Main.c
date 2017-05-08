@@ -60,7 +60,7 @@ void main(void)
 	
 	while (1)
 	{
-		ArtificialIntelligenceAvoidObjects();
-		//ArtificialIntelligenceFollowObjects();
+		//ArtificialIntelligenceAvoidObjects();
+		ArtificialIntelligenceFollowObjects();
 	}
 }

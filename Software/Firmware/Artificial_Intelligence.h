@@ -27,4 +27,10 @@ void ArtificialIntelligenceRandomAngleTurn(unsigned char Is_Turning_Left);
  */
 void ArtificialIntelligenceAvoidObjects(void);
 
+/** Robot follows an object that is close enough to be spotted. It waits when the object is still and moves when the object moves.
+ * Robot will escape if the object comes too close.
+ * This behaviour will cease when the robot is bored (nothing at sight or the object is still for a too long time) or when it is scared (object is too close).
+ */
+void ArtificialIntelligenceFollowObjects(void);
+
 #endif

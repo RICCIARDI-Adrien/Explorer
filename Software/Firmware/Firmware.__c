@@ -1,37 +1,38 @@
 [Settings]
 Target=PIC18F26K22
 Active Compiler=BoostC
-Active Directory=C:\Documents and Settings\AR\Mes documents\Explorer\Software\Firmware\
+Active Directory=F:\cygwin64\home\Adrien\Explorer\Software\Firmware\
 Active Config=Release
 ClockRate=64000000
 Last Ext=c
 Last ExtIdx=1
-Last Dir=C:\Documents and Settings\AR\Mes documents\Explorer\Software\Firmware\
+Last Dir=F:\cygwin64\home\Adrien\Explorer\Software\Firmware\
 Type=0
 Warnings=1
 Model=1
 Profiling=0
 Snapshot=0
 [Files]
-Count=18
+Count=19
 File0=ADC.c
 File1=ADC.h
 File2=Artificial_Intelligence.c
 File3=Artificial_Intelligence.h
 File4=Artificial_Intelligence_Avoid_Objects.c
-File5=Distance_Sensor.c
-File6=Distance_Sensor.h
-File7=Interrupt.c
-File8=Led.h
-File9=Main.c
-File10=Motor.c
-File11=Motor.h
-File12=Random.c
-File13=Random.h
-File14=Shared_Timer.c
-File15=Shared_Timer.h
-File16=UART.c
-File17=UART.h
+File5=Artificial_Intelligence_Follow_Objects.c
+File6=Distance_Sensor.c
+File7=Distance_Sensor.h
+File8=Interrupt.c
+File9=Led.h
+File10=Main.c
+File11=Motor.c
+File12=Motor.h
+File13=Random.c
+File14=Random.h
+File15=Shared_Timer.c
+File16=Shared_Timer.h
+File17=UART.c
+File18=UART.h
 [Bookmarks]
 Count=0
 [Breakpoints]
