@@ -21,7 +21,7 @@
 /** The shared timer used to measure the elapsed time since the last object was detected. */
 #define ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_DETECTION 0
 /** How many time until the timer overflows (in 100ms unit). */
-#define ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_VALUE_OBJECT_DETECTION 40 // Robot needs 4s to do a 360° turn
+#define ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_VALUE_OBJECT_DETECTION 100
 /** The shared timer used to measure the rotation time. */
 #define ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_SEARCH 1
 
@@ -46,9 +46,6 @@ void ArtificialIntelligenceFollowObjects(void)
 	TArtificialIntelligenceFollowObjectsState State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_WAIT_FOR_OBJECT;
 	unsigned char Is_Object_Moving_To_Left = 0;
 	
-	// Start the object detection timer (behavior changes when this timer overflows, it is reset every time an object has been found)
-	SharedTimerStartTimer(ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_DETECTION, ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_VALUE_OBJECT_DETECTION);
-	
 	while (1)
 	{
 		// Make the robot react in 20ms (it is useless to react too fast because motors and distance sensor are far more slower than the microcontroller running frequency)
@@ -60,21 +57,43 @@ void ArtificialIntelligenceFollowObjects(void)
 		// Escape if the object comes too close
 		if (Distance <= ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_DISTANCE_ESCAPING)
 		{
-			// TODO go rear for 3 seconds
-			// TODO 180 degrees turn
-			// TODO call avoid objects AI and stop follow objects AI
+			LedOnRed();
+		
+			// Go rear
+			MotorSetState(MOTOR_LEFT, MOTOR_STATE_BACKWARD);
+			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_BACKWARD);
+			delay_s(3);
+			
+			// Do a 180 degrees turn
+			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_FORWARD);
+			delay_s(2);
+			// Then stop motors so next behavior find them stopped
+			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
+			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
+			
+			// TODO call avoid objects AI ?
+			LedOff();
+			return;
 		}
 		
-		// Change behavior if no object was detected for a long time
-		if (SharedTimerIsTimerStopped(ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_DETECTION))
+		// TODO Change behavior if no object was detected for a long time
+		/*if (SharedTimerIsTimerStopped(ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_DETECTION))
 		{
-			// TODO
-		}
+			LedOff();
+			
+			// Stop motors so next behavior find them stopped
+			MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
+			MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
+			return;
+		}*/
 		
 		// Decide what to do next
 		switch (State)
 		{
 			case ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_WAIT_FOR_OBJECT:
+				// Start the object detection timer (behavior changes when this timer overflows, it is reset every time an object has been found)
+				SharedTimerStartTimer(ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_DETECTION, ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_VALUE_OBJECT_DETECTION);
+			
 				// Is there an object at sight ?
 				if (Distance <= ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_DISTANCE_START_FOLLOWING)
 				{
@@ -85,8 +104,6 @@ void ArtificialIntelligenceFollowObjects(void)
 					
 					State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_FOLLOW_OBJECT;
 				}
-				
-				// TODO start timer, if nothing at sight for a long time change behavior
 				break;
 			
 			// An object is at sight, go close to it (but not too close)	
