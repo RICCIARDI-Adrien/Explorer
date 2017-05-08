@@ -9,11 +9,6 @@
 // Functions
 //--------------------------------------------------------------------------------------------------
 // Utility functions
-/** Accumulate distance samples for 400ms and return the average.
- * @return The average distance.
- */
-unsigned short ArtificialIntelligenceSampleDistance(void);
-
 /** Randomly returns 0 or 1.
  * @return 0 or 1.
  */

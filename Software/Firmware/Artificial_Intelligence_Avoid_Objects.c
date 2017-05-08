@@ -39,7 +39,10 @@ void ArtificialIntelligenceAvoidObjects(void)
 	
 	while (1)
 	{
-		Distance = ArtificialIntelligenceSampleDistance();
+		// Make the robot react in 20ms (it is useless to react too fast because motors and distance sensor are far more slower than the microcontroller running frequency)
+		delay_ms(20);
+	
+		Distance = DistanceSensorGetLastSampledDistance();
 		
 		// Go backward if the obstacle is too close
 		if (Distance < DISTANCE_SENSOR_CONVERT_CENTIMETERS_TO_SENSOR_UNIT(15))

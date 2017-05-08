@@ -52,6 +52,9 @@ void main(void)
 	MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
 	MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
 	
+	// Wait enough time to let the distance sensor sample a real value
+	delay_ms(120);
+	
 	// System is ready
 	LedOnGreen();
 	

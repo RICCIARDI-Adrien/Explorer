@@ -11,20 +11,6 @@
 //--------------------------------------------------------------------------------------------------
 // Public functions
 //--------------------------------------------------------------------------------------------------
-unsigned short ArtificialIntelligenceSampleDistance(void)
-{
-	unsigned long Distance = 0;
-	unsigned char i;
-	
-	// Get several samples
-	for (i = 0; i < 4; i++) Distance += DistanceSensorGetDistance();
-		
-	// Compute the average
-	Distance >>= 2; // Fast division per 4
-	
-	return (unsigned short) Distance;
-}
-
 unsigned char ArtificialIntelligenceRandomBinaryChoice(void)
 {
 	if (RandomGetNumber() < 128) return 0; // Do not use modulo operator to be faster

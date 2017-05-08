@@ -4,6 +4,7 @@
  */
 #include <system.h>
 #include "ADC.h"
+#include "Distance_Sensor.h"
 #include "Shared_Timer.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -67,7 +68,7 @@ void SharedTimerInterruptHandler(void)
 		Frequency_Divider_1Hz = 0;
 	}
 	
-	// Decrement the timers every 100ms
+	// Decrement the timers every 100ms and trigger distance sensor measuring procedure
 	Frequency_Divider_10_Hz++;
 	if (Frequency_Divider_10_Hz >= 3)
 	{
@@ -76,6 +77,8 @@ void SharedTimerInterruptHandler(void)
 			if (Shared_Timer_Timers_Counters[i] > 0) Shared_Timer_Timers_Counters[i]--;
 		}
 		Frequency_Divider_10_Hz = 0;
+		
+		DistanceSensorStartMeasure();
 	}
 	
 	// Clear the interrupt flag

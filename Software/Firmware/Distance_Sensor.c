@@ -35,9 +35,6 @@
 /** The distance to the nearest object in centimeters. */
 static unsigned short Distance_Sensor_Last_Measured_Distance = 0; // Do not allow the motors to move until a real measure has been done
 
-/** Tell when a measure has been completed. */
-static volatile unsigned char Distance_Sensor_Is_Measure_Completed = 0;
-
 //--------------------------------------------------------------------------------------------------
 // Public functions
 //--------------------------------------------------------------------------------------------------
@@ -67,19 +64,13 @@ void DistanceSensorInitialize(void)
 	pie1.TMR2IE = 1; // Enable the interrupt
 }
 
-unsigned short DistanceSensorGetDistance(void)
+void DistanceSensorStartMeasure(void)
 {
 	// Trigger a distance measure
 	latb.DISTANCE_SENSOR_TRIGGER_PIN = 1;
 	// Configure timer 2 to trigger an interrupt 20us later
 	tmr2 = 0;
 	t2con = 0x06; // Do not use a postscaler, enable the timer, set a 16x prescaler to get a timer frequency of 1MHz (so it is easy to count microseconds)
-	
-	// Wait for the distance sensor to answer
-	while (!Distance_Sensor_Is_Measure_Completed);
-	Distance_Sensor_Is_Measure_Completed = 0;
-
-	return Distance_Sensor_Last_Measured_Distance;
 }
 
 unsigned short DistanceSensorGetLastSampledDistance(void)
@@ -116,8 +107,6 @@ void DistanceSensorInterruptHandler(void)
 		Distance_Sensor_Last_Measured_Distance = tmr0l; // TMR0L must be read before TMR0H to grant a valid result
 		Distance_Sensor_Last_Measured_Distance |= tmr0h << 8;
 		DISTANCE_SENSOR_COUNTER_TIMER_RESET();
-		
-		Distance_Sensor_Is_Measure_Completed = 1;
 	}
 	
 	// Clear the interrupt flag
