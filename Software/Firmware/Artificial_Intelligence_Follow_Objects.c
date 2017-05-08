@@ -43,15 +43,11 @@ typedef enum
 void ArtificialIntelligenceFollowObjects(void)
 {
 	unsigned short Distance = 0;
-	static TArtificialIntelligenceFollowObjectsState State;
-	
-	// Initialize static variables when entering the function
-	State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_WAIT_FOR_OBJECT;
+	TArtificialIntelligenceFollowObjectsState State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_WAIT_FOR_OBJECT;
+	unsigned char Is_Object_Moving_To_Left = 0;
 	
 	// Start the object detection timer (behavior changes when this timer overflows, it is reset every time an object has been found)
 	SharedTimerStartTimer(ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_DETECTION, ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_VALUE_OBJECT_DETECTION);
-	
-		SharedTimerStartTimer(2, 0);
 	
 	while (1)
 	{
@@ -122,11 +118,11 @@ void ArtificialIntelligenceFollowObjects(void)
 					MotorSetState(MOTOR_LEFT, MOTOR_STATE_STOPPED);
 					MotorSetState(MOTOR_RIGHT, MOTOR_STATE_STOPPED);
 					
-					// TODO last object direction to go directly in the object last taken direction
-					State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_SEARCH_OBJECT_ON_LEFT;
+					// Start searching in the last direction the object moved to
+					if (Is_Object_Moving_To_Left) State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_SEARCH_OBJECT_ON_LEFT;
+					else State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_SEARCH_OBJECT_ON_RIGHT;
 					
 					// Start a timer that will make the robot turn to the other direction on overflow
-					// TODO handle left and right directions according to last direction variable
 					SharedTimerStartTimer(ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_SEARCH, 10); // Robot needs 1s to turn 90°
 				}
 				break;
@@ -143,6 +139,7 @@ void ArtificialIntelligenceFollowObjects(void)
 					// Reset timer as an object was detected
 					SharedTimerStartTimer(ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_DETECTION, ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_VALUE_OBJECT_DETECTION);
 					
+					Is_Object_Moving_To_Left = 1;
 					State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_FOLLOW_OBJECT;
 				}
 				// Object is out of sight
@@ -180,6 +177,7 @@ void ArtificialIntelligenceFollowObjects(void)
 					// Reset timer as an object was detected
 					SharedTimerStartTimer(ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_INDEX_OBJECT_DETECTION, ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_TIMER_VALUE_OBJECT_DETECTION);
 					
+					Is_Object_Moving_To_Left = 0;
 					State = ARTIFICIAL_INTELLIGENCE_FOLLOW_OBJECTS_STATE_FOLLOW_OBJECT;
 				}
 				// Object is out of sight
