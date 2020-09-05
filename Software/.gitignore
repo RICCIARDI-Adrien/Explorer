@@ -1,5 +1,6 @@
 Bootloader/Debug
 Firmware/Debug
+Firmware/Release
 *.asm
 *.brws
 *.casm
