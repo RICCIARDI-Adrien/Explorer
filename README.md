@@ -8,7 +8,7 @@ The goal was to develop and test two basic artificial intelligence algorithms, b
 - The robot is idle, waiting for a moving object to come close to it. Then, it must follow the moving object, staying at a safe distance. If the moving object comes too close from the robot, the robot must escape.
 
 ## Hardware
-![Main board schematics](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Hardware/Schematics.png)
+![Main board schematics](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Schematics.png)
 
 ## Build tools
 The schematics and PCB were drawn using Cadsoft Eagle 6.6.0.  
