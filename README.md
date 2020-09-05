@@ -46,3 +46,14 @@ Screw them into supports :
 
 Screw voltage regulator to chassis bottom plate. This allows to use the whole chassis as heat sink.
 ![Assembled voltage regulator](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Assembled_Voltage_Regulator.jpg)
+
+### Chassis upper part
+
+Drill holes for LED, switch and serial communication connector, then screw them. Also add the nuts and bolts that will hold the battery pack.
+![Chassis top 1](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Chassis_Top_1.jpg)
+
+Solder battery pack coupler to a little piece of PCB (don't forget to isolate terminals). This way, when coupler wires will break (it just a matter of time before it happens), it is easy to repair without having to disassemble the chassis.
+![Chassis top 2](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Chassis_Top_2.jpg)
+
+Solder LED, switch and connector wires :
+![Chassis top 3](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Chassis_Top_3.jpg)
