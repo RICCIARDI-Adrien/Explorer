@@ -57,3 +57,12 @@ Solder battery pack coupler to a little piece of PCB (don't forget to isolate te
 
 Solder LED, switch and connector wires :
 ![Chassis top 3](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Chassis_Top_3.jpg)
+
+### Electronic board
+
+Board is made of test PCB soldered by hand.
+![Circuit top](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Circuit_Top.jpg)
+![Circuit bottom](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Circuit_Bottom.jpg)
+
+Here is the board screwed to the chassis bottom :
+![Chassis bottom 5](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Chassis_Bottom_5.jpg)
