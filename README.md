@@ -66,3 +66,9 @@ Board is made of test PCB soldered by hand.
 
 Here is the board screwed to the chassis bottom :
 ![Chassis bottom 5](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Chassis_Bottom_5.jpg)
+
+### Fully assembled robot
+
+![Robot terminated 2](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Robot_Terminated_2.jpg)
+![Robot terminated 3](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Robot_Terminated_3.jpg)
+![Robot terminated 4](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Robot_Terminated_4.jpg)
