@@ -33,3 +33,16 @@ Now screw the free wheel :
 
 Add the screws that will hold the chassis upper plate :
 ![Chassis bottom 4](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Chassis_Bottom_4.jpg)
+
+### Motors assembly
+
+Here are the servomotors :
+![Servomotors](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Servomotors.jpg)
+
+Screw them into supports :
+![Assembled servomotors](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Assembled_Servomotors.jpg)
+
+### Voltage regulator assembly
+
+Screw voltage regulator to chassis bottom plate. This allows to use the whole chassis as heat sink.
+![Assembled voltage regulator](https://github.com/RICCIARDI-Adrien/Explorer/blob/master/Resources/Assembled_Voltage_Regulator.jpg)
